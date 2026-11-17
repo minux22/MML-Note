@@ -26,3 +26,7 @@ npm test                    # MML encoder and checker tests
 ## License
 
 GNU General Public License v3 or later. See LICENSE.
+
+## Sounds
+
+By default the app downloads the bundled **GeneralUser GS v2.0.3** SoundFont by S. Christian Collins (`sf/GeneralUser-GS.sf2`, license in `sf/LICENSE.txt`) on first launch and plays each game instrument with a sound from it (Setup › Sound › Instrument sounds). The basic synth remains available.

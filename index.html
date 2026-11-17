@@ -178,8 +178,12 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 .mmlst{font:700 11px var(--mono); color:var(--dim); margin-left:6px}
 #mmlImp{width:100%; min-height:70px; font:12px var(--mono); border:1px solid var(--line); border-radius:8px; padding:8px; background:var(--panel-2); color:var(--text)}
 #drumBtn,[data-pt=rhythm],#pRhythm,[data-rm=rhythm]{display:none!important}
-/* basic synth only: no SoundFont controls, no per-part sound lines */
-#sfMode,#sfOnly,#sfRows,#spBox,#sfNote,#cPatch,#bPatch,#sPatch,#drumNote{display:none!important}
+/* SoundFont: one sound per game instrument (#ipRows); PhraseNote's per-track rows and presets stay hidden */
+#sfRows,#spBox,#cPatch,#bPatch,#sPatch,#drumNote{display:none!important}
+#ipRows{display:flex; flex-direction:column; gap:6px; margin-top:10px}
+#ipRows .sfrow{display:grid; grid-template-columns:84px 1fr; gap:8px; align-items:center}
+#ipRows select{min-width:0; width:100%}
+#ipRows.off{opacity:.45; pointer-events:none}
 #drumBtn svg{width:25px; height:25px}
 .plist{max-height:60vh; overflow:auto; display:flex; flex-direction:column; gap:2px; margin:0 -4px}
 .plist .gh{font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--mint); padding:8px 6px 2px}
@@ -1225,6 +1229,15 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
         <input id="sfIn" type="file" hidden>
         <div id="sfList"></div>
       </div>
+      <div id="ipRows" aria-label="Instrument sounds">
+        <span class="lbl">Instrument sounds</span>
+        <div class="sfrow"><span class="lbl">Lute</span><select id="ipLute" data-ik="lute" aria-label="Lute sound"></select></div>
+        <div class="sfrow"><span class="lbl">Mandolin</span><select id="ipMandolin" data-ik="mandolin" aria-label="Mandolin sound"></select></div>
+        <div class="sfrow"><span class="lbl">Flute</span><select id="ipFlute" data-ik="flute" aria-label="Flute sound"></select></div>
+        <div class="sfrow"><span class="lbl">Violin</span><select id="ipViolin" data-ik="violin" aria-label="Violin sound"></select></div>
+        <div class="sfrow"><span class="lbl">Chalumeau</span><select id="ipChalumeau" data-ik="chalumeau" aria-label="Chalumeau sound"></select></div>
+        <div class="sfrow"><span class="lbl">Xylophone</span><select id="ipXylophone" data-ik="xylophone" aria-label="Xylophone sound"></select></div>
+      </div>
       <div id="sfRows">
         <div class="sfrow tr"><span class="lbl">Melody</span><select class="fs" id="sfMf" aria-label="Melody SoundFont"></select><select id="sfM" aria-label="Melody sound"></select></div>
         <div class="sfrow tr"><span class="lbl">Chords</span><select class="fs" id="sfCf" aria-label="Chords SoundFont"></select><select id="sfC" aria-label="Chords sound"></select></div>
@@ -1253,7 +1266,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.5 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.0 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -3902,7 +3915,7 @@ const Aud=(function(){
   /* sustain until the returned function is called (finger down on the staff) */
   function hold(m,vel){
     if(!ensure())return function(){};
-    const g=leadV(m,vel,ctx.currentTime+0.005,10);
+    const g=partV(m,vel,ctx.currentTime+0.005,10);
     return function(){const n=ctx.currentTime;try{const v=g.gain.value;g.gain.cancelScheduledValues(n);g.gain.setValueAtTime(v,n);g.gain.setTargetAtTime(0,n,0.05);(g._srcs||[]).forEach(function(x){try{x.stop(n+0.4);}catch(e){}});}catch(e){}};
   }
   function click(t,acc,vel){
@@ -3961,6 +3974,17 @@ const Aud=(function(){
      bowed (violin) and struck (xylophone). Plucked and struck notes fade by themselves, like in the game. */
   let INST={t1:'lute',t2:'lute',t3:'lute',t4:'lute',t5:'lute',t6:'lute'};
   function setInsts(a){(a||[]).forEach(function(v,i){INST['t'+(i+1)]=v;});}
+  /* SoundFont sound for each game instrument ({fid,pi,vol} or null = basic synth), set from Setup › Sound */
+  const IPI={};
+  function setInstSound(kind,fid,pi,vol){IPI[kind]=fid&&pi>=0?{fid:fid,pi:pi,vol:vol}:null;}
+  function playPart(k,m,vel,t,dur,zv){
+    const S=IPI[INST[k]];
+    if(S){trk[k]=S;const g=sfv(k,m,vel,t,dur,null,zv);if(g)return g;}
+    return via(k,function(){return instr(INST[k],m,vel,t,dur);});
+  }
+  function partV(m,vel,t,dur){return playPart('t'+(Core.curTrack()+1),m,vel,t,dur);}
+  /* audition a game instrument on the current part's channel */
+  function auditionKind(kind){if(!ensure())return;const k='t'+(Core.curTrack()+1), old=INST[k];INST[k]=kind;try{audition(k);}finally{INST[k]=old;}}
   function vib(o,t,rate,cents,delay){const l=ctx.createOscillator(), lg=ctx.createGain();l.frequency.value=rate;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(cents,t+delay+0.2);l.connect(lg);lg.connect(o.detune);l.start(t);return l;}
   let NOISE=null;
   function noiseBuf(){if(NOISE&&NOISE.sampleRate===ctx.sampleRate)return NOISE;const b=ctx.createBuffer(1,Math.floor(ctx.sampleRate*1),ctx.sampleRate),c=b.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1;return NOISE=b;}
@@ -4046,8 +4070,8 @@ const Aud=(function(){
   function epV(m,vel,t,dur,zv){if(!sfv('c',m,vel,t,dur,null,zv))via('c',function(){ep(m,vel,t,dur);});}
   function bassV(m,vel,t,dur,zv){if(!sfv('b',m,vel,t,dur,null,zv))via('b',function(){bass(m,vel,t,dur);});}
   function leadV(m,vel,t,dur,zv){return sfv('m',m,vel,t,dur,null,zv)||via('m',function(){return lead(m,vel,t,dur);});}
-  function tone(m,vel,dur){if(!ensure())return;leadV(m,vel,ctx.currentTime+0.01,dur);}
-  function note(k,m,vel,t,dur,zv){if(!ctx)return;if(k==='m')k='t'+(Core.curTrack()+1);if(TK.indexOf(k)>=0){via(k,function(){instr(INST[k],m,vel,t,dur);});return;}if(k==='s'){if(!sfv('s',m,vel,t,dur,null,zv))via('s',function(){strSyn(m,vel,t,dur);});return;}if(k==='c')epV(m,vel,t,dur,zv);else if(k==='m')leadV(m,vel,t,dur,zv);else bassV(m,vel,t,dur,zv);}
+  function tone(m,vel,dur){if(!ensure())return;partV(m,vel,ctx.currentTime+0.01,dur);}
+  function note(k,m,vel,t,dur,zv){if(!ctx)return;if(k==='m')k='t'+(Core.curTrack()+1);if(TK.indexOf(k)>=0){playPart(k,m,vel,t,dur,zv);return;}if(k==='s'){if(!sfv('s',m,vel,t,dur,null,zv))via('s',function(){strSyn(m,vel,t,dur);});return;}if(k==='c')epV(m,vel,t,dur,zv);else if(k==='m')leadV(m,vel,t,dur,zv);else bassV(m,vel,t,dur,zv);}
   function prune(){if(!ctx)return;const n=ctx.currentTime;for(let i=voices.length-1;i>=0;i--)if(voices[i].stop<n)voices.splice(i,1);}
   function stopAll(){
     if(!ctx)return; const now=ctx.currentTime;
@@ -4106,7 +4130,7 @@ const Aud=(function(){
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+f);g.gain.setValueAtTime(vol,t+dur-f);g.gain.linearRampToValueAtTime(0,t+dur);
     s.start(t,off,dur+0.01);voices.push({g:g,t:t,stop:t+dur+0.1});g._srcs=[s];
   }
-  return {level:level,setMix:setMix,playBuf:playBuf,lat:lat,ensure:ensure,click:click,note:note,tone:tone,hold:hold,prune:prune,stopAll:stopAll,preview:preview,ctx:function(){return ctx;},
+  return {setInstSound:setInstSound,auditionKind:auditionKind,level:level,setMix:setMix,playBuf:playBuf,lat:lat,ensure:ensure,click:click,note:note,tone:tone,hold:hold,prune:prune,stopAll:stopAll,preview:preview,ctx:function(){return ctx;},
     setMaster:setMaster,addFont:addFont,removeFont:removeFont,setTrack:setTrack,setReverb:setReverb,warm:warm,audition:audition,setInsts:setInsts,drum:drum,setClick:function(v){clickVol=v;}};
 })();
 
@@ -6712,7 +6736,7 @@ document.addEventListener('keydown',function(e){
     });
   }
   /* which file and preset a track plays; falls back to another file, then to the default sound */
-  function isBasic(){return true;}
+  function isBasic(){return S.basic===undefined?!files.length:S.basic;}
   function resolve(k){
     const none={fid:null,pi:-1};
     if(!files.length||isBasic())return none;
@@ -6729,7 +6753,40 @@ document.addEventListener('keydown',function(e){
     if(i<0){const pool=k==='d'?F.m.kits:F.m.list;if(pool.length)i=pool[0].i;}
     return i<0?none:{fid:F.id,pi:i};
   }
+  /* game instrument -> SoundFont sound [bank, program (0-based)] in GeneralUser GS; null = basic synth */
+  const IK=['lute','mandolin','flute','violin','chalumeau','xylophone'];
+  const DEFI={lute:[0,26],mandolin:[8,25],flute:[0,73],violin:[0,40],chalumeau:[0,71],xylophone:[0,13]}, IVOL=55;
+  if(!S.ip||typeof S.ip!=='object')S.ip={};
+  function ipOf(kind){const v=S.ip[kind];return v===null?null:(Array.isArray(v)?v:DEFI[kind]);}
+  function resolveI(kind){
+    const none={fid:null,pi:-1}, t=ipOf(kind);
+    if(!files.length||isBasic()||!t)return none;
+    const order=guFirst();
+    for(let j=0;j<order.length;j++){const q=order[j].m.indexOf(t[0],t[1]);if(q>=0)return {fid:order[j].id,pi:q};}
+    for(let j=0;j<order.length;j++){const q=order[j].m.indexOf(0,t[1]);if(q>=0)return {fid:order[j].id,pi:q};}
+    return none;
+  }
+  function applyInst(){
+    const F0=guFirst()[0]||null, off=!files.length||isBasic();
+    $('#ipRows').classList.toggle('off',off);
+    IK.forEach(function(kind){
+      const r=resolveI(kind);Aud.setInstSound(kind,r.fid,r.pi,gain(IVOL));
+      const el=document.querySelector('#ipRows select[data-ik="'+kind+'"]'), F=r.fid?fileById(r.fid):F0;
+      el.innerHTML='';el.appendChild(new Option('Basic synth','-1'));
+      if(F){const g0=grp('General MIDI'),g1=grp('Variations');
+        F.m.list.forEach(function(p){(p.bank===0?g0:g1).appendChild(new Option(p.bank===0?(p.num+1)+'. '+p.name:p.name+' ('+p.bank+':'+(p.num+1)+')',F.id+'|'+p.i));});
+        if(g0.children.length)el.appendChild(g0);if(g1.children.length)el.appendChild(g1);}
+      el.value=r.fid?r.fid+'|'+r.pi:'-1';el.disabled=off;
+    });
+  }
+  document.querySelectorAll('#ipRows select').forEach(function(el){el.addEventListener('change',function(){
+    const kind=el.dataset.ik, v=el.value;
+    if(v==='-1')S.ip[kind]=null;
+    else{const a=v.split('|'), F=fileById(a[0]), pr=F&&F.m.presets[+a[1]];if(pr)S.ip[kind]=[pr.bank,pr.num];}
+    save();apply();Aud.auditionKind(kind);
+  });});
   function apply(){
+    applyInst();
     TR.forEach(function(k){
       const r=resolve(k);
       Aud.setTrack(k,r.fid,r.pi,gain(TVOL[k]));
@@ -6823,7 +6880,7 @@ document.addEventListener('keydown',function(e){
   }
   function syncLoaded(){
     const need={};
-    if(!isBasic())TR.forEach(function(k){const r=resolve(k);if(r.fid)need[r.fid]=1;});
+    if(!isBasic()){TR.forEach(function(k){const r=resolve(k);if(r.fid)need[r.fid]=1;});IK.forEach(function(k){const r=resolveI(k);if(r.fid)need[r.fid]=1;});}
     files.forEach(function(F){
       if(need[F.id]){if(!F.sf)loadFile(F);}
       else if(F.sf){Aud.removeFont(F.id);F.sf=null;}
@@ -7054,7 +7111,9 @@ document.addEventListener('keydown',function(e){
     });
   }).catch(function(){}).then(function(){
     /* first launch with nothing chosen yet: fetch the built-in GeneralUser GS once */
-    return; /* MML Note: basic synth only, no SoundFont download */
+    if(files.length||S.basic!==undefined||S.gu)return;
+    try{if(navigator.connection&&navigator.connection.saveData)return;}catch(e){}
+    builtin(true);
   });
   /* GeneralUser GS v2.0.3 by S. Christian Collins, shipped with the app (sf/GeneralUser-GS.sf2, see sf/LICENSE.txt) */
   var GU_URL='sf/GeneralUser-GS.sf2', GU_NAME='GeneralUser-GS.sf2', guBusy=false;
