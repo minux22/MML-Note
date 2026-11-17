@@ -94,7 +94,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 #metBtn svg{width:25px; height:25px}
 #metBtn[aria-pressed="false"]{opacity:.45}
 /* listen switch: Parts (the six parts in the game sounds) or Backing (Melody + generated backing) */
-.hear{flex:none; display:inline-flex; flex-direction:column; justify-content:center; height:36px; padding:0 6px; margin-left:-2px; border:1.5px solid var(--ctl); border-radius:11px; background:var(--ctl); color:var(--ctl-ink); font-family:inherit; font-size:8.5px; font-weight:800; line-height:1.3; letter-spacing:0; text-transform:uppercase; cursor:pointer}
+.hear{flex:none; display:inline-flex; flex-direction:column; justify-content:center; height:36px; padding:0 6px; border:1.5px solid var(--ctl); border-radius:11px; background:var(--ctl); color:var(--ctl-ink); font-family:inherit; font-size:8.5px; font-weight:800; line-height:1.3; letter-spacing:0; text-transform:uppercase; cursor:pointer}
 .hear span{opacity:.4}
 .hear[data-h="parts"] span:first-child,.hear[data-h="backing"] span:last-child{opacity:1}
 /* narrow phones (360 px wide): tighten the transport so the listen switch fits beside undo and redo */
@@ -186,7 +186,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 #mmlImp{width:100%; min-height:70px; font:12px var(--mono); border:1px solid var(--line); border-radius:8px; padding:8px; background:var(--panel-2); color:var(--text)}
 #drumBtn,[data-pt=rhythm],#pRhythm,[data-rm=rhythm]{display:none!important}
 /* SoundFont: one sound per game instrument (#ipRows); PhraseNote's per-track rows and presets stay hidden */
-#sfRows,#spBox,#cPatch,#bPatch,#sPatch,#drumNote{display:none!important}
+#spBox,#drumNote,#sfRows .sfrow:has(#sfM),#sfRows .drow,#sfRows .sub{display:none!important}
 #ipRows{display:flex; flex-direction:column; gap:6px; margin-top:10px}
 #ipRows .sfrow{display:grid; grid-template-columns:84px 1fr; gap:8px; align-items:center}
 #ipRows select{min-width:0; width:100%}
@@ -972,9 +972,9 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
 
 <nav class="lrail" id="lrail" aria-label="Edit tools">
   <button type="button" class="lr lrplay" data-lr="play" aria-label="Play"></button>
+  <button type="button" class="lr" data-lr="hear" aria-label="Listen to: Parts or Backing">Parts</button>
   <button type="button" class="lr" data-lr="rew" aria-label="Back to the start"></button>
   <button type="button" class="lr" data-lr="met" aria-label="Metronome" aria-pressed="false"></button>
-  <button type="button" class="lr" data-lr="hear" aria-label="Listen to: Parts or Backing">Parts</button>
   <span class="lrsep"></span>
   <button type="button" class="lr" data-lr="smart" aria-label="Smart tool (off: view lock)" aria-pressed="true"></button>
   <span class="lrsep"></span>
@@ -995,6 +995,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
 
   <div class="bar" role="group" aria-label="Transport">
     <button class="play" id="playBtn" type="button" aria-label="Play"></button>
+    <button class="hear" id="hearBtn" type="button" aria-label="Listen to: Parts or Backing" title="Switch between the six parts and the generated backing"><span>Parts</span><span>Backing</span></button>
     <button class="rew" id="rewBtn" type="button" aria-label="Back to the start"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M6 5v14M19 5v14L9 12z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="bpm">
       <button type="button" id="bpmDown" aria-label="Slower">−</button>
@@ -1004,7 +1005,6 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
     </div>
     <span class="sp"></span>
     <button class="tgl" id="metBtn" type="button" aria-pressed="false" aria-label="Metronome" title="Metronome"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9.2 2.8h5.6l4.6 18.4H4.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6.3 15.6h11.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 15.6 17.6 5.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="15.9" cy="8.5" r="1.7" fill="currentColor"/></svg></button>
-    <button class="hear" id="hearBtn" type="button" aria-label="Listen to: Parts or Backing" title="Switch between the six parts and the generated backing"><span>Parts</span><span>Backing</span></button>
     <button class="tgl" id="drumBtn" type="button" aria-pressed="false" aria-label="Drums"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><ellipse cx="12" cy="11.2" rx="9.8" ry="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.2 11.2v7.4c0 1.8 4.4 3.2 9.8 3.2s9.8-1.4 9.8-3.2v-7.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 14.4v6.2M12 14.6v7M17 14.4v6.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6.2 3.6L10.4 10.2M17.8 3.6L13.6 10.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10.8" cy="10.9" r="1.2" fill="currentColor"/><circle cx="13.2" cy="10.9" r="1.2" fill="currentColor"/></svg></button>
     <span class="sp"></span>
     <button class="icon" id="undoBtn" type="button" aria-label="Undo"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1248,6 +1248,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <div id="sfRows">
         <div class="sfrow tr"><span class="lbl">Melody</span><select class="fs" id="sfMf" aria-label="Melody SoundFont"></select><select id="sfM" aria-label="Melody sound"></select></div>
+        <span class="lbl" style="display:block;margin-top:12px">Backing sounds</span>
         <div class="sfrow tr"><span class="lbl">Chords</span><select class="fs" id="sfCf" aria-label="Chords SoundFont"></select><select id="sfC" aria-label="Chords sound"></select></div>
         <div class="sfrow tr"><span class="lbl">Strings</span><select class="fs" id="sfSf" aria-label="Strings SoundFont"></select><select id="sfS" aria-label="Strings sound"></select></div>
         <div class="sfrow tr"><span class="lbl">Bass</span><select class="fs" id="sfBf" aria-label="Bass SoundFont"></select><select id="sfB" aria-label="Bass sound"></select></div>
@@ -1274,7 +1275,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.1 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.2 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
