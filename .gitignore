@@ -1,0 +1,6 @@
+# test outputs
+*.mid
+*.zip
+kv/
+dist/
+node_modules/
