@@ -1301,7 +1301,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.4 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.5 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -7319,7 +7319,8 @@ function importMml(txt){
   allB.addEventListener('click',function(){U.instAll=!U.instAll;saveU();allUI();
     if(U.instAll){const v=P.pinst[Core.curTrack()];for(let i=0;i<6;i++)P.pinst[i]=v;Aud.setInsts(P.pinst);persist();renderTrkRow();toast('All six parts: '+INST_NAME[v]+'.');}});
   rndB.addEventListener('click',function(){
-    const L=Core.INSTS;for(let i=0;i<6;i++)P.pinst[i]=L[Math.floor(Math.random()*L.length)];
+    const L=Core.INSTS.filter(function(k){return k!=='bigdrum'&&k!=='cymbals';});  /* no percussion in a shuffle */
+    for(let i=0;i<6;i++)P.pinst[i]=L[Math.floor(Math.random()*L.length)];
     if(U.instAll){U.instAll=false;saveU();allUI();}
     Aud.setInsts(P.pinst);persist();is.value=P.pinst[Core.curTrack()];renderTrkRow();
     toast(P.pinst.map(function(v,i){return (i?'C'+i:'Mel')+' '+INST_NAME[v];}).join(' · '));});
