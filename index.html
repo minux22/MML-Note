@@ -196,8 +196,9 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 #drumBtn,[data-pt=rhythm],#pRhythm,[data-rm=rhythm]{display:none!important}
 /* SoundFont: one sound per game instrument (#ipRows); PhraseNote's per-track rows and presets stay hidden */
 #spBox,#drumNote,#sfRows .sfrow:has(#sfM),#sfRows .drow,#sfRows .sub{display:none!important}
-#bakeHint.aclist{list-style:none; text-align:left; margin:6px 0 0; padding:0 4px}
-#bakeHint.aclist li{position:relative; padding-left:14px; line-height:1.6}
+#ensPanel{gap:2px}
+#bakeHint.aclist{list-style:none; text-align:left; margin:0; padding:0 4px}
+#bakeHint.aclist li{position:relative; padding-left:14px; line-height:1.5}
 #bakeHint.aclist li::before{content:'•'; position:absolute; left:2px; color:var(--dim)}
 #ipRows{display:flex; flex-direction:column; gap:6px; margin-top:10px}
 #ipRows .sfrow{display:grid; grid-template-columns:84px 1fr; gap:8px; align-items:center}
@@ -770,7 +771,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
 #staffCtl .stgrid .sttool{grid-column:span 3; justify-self:start; align-self:center}
 /* Smart tool switch: a dark outlined chip so it stands out (Roll and Staff) */
 .smchip{display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 5px 0 11px; border:1.5px solid color-mix(in srgb,var(--panel-2) 72%,var(--text)); border-radius:999px; background:var(--panel-2); cursor:pointer; -webkit-tap-highlight-color:transparent; box-sizing:border-box}
-.smchip .lbl,#staffCtl .smchip .lbl{font-size:10px; letter-spacing:0; white-space:nowrap; color:var(--text); margin:0}
+.smchip .lbl,#staffCtl .smchip .lbl{font-size:10px; letter-spacing:0; white-space:nowrap; color:var(--dim); margin:0}
 .smchip .tg,#staffCtl .stgrid .smchip .tg{margin:0; flex:none; width:40px; height:22px; min-width:0; border-color:color-mix(in srgb,var(--text) 25%,transparent)}
 #staffCtl .stgrid button.on:not(.tg){background:var(--blue); border-color:var(--blue); color:var(--on-blue)}
 #staffCtl .stgrid button svg{width:16px; height:24px}
@@ -1287,7 +1288,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.4 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.5 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
