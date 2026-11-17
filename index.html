@@ -102,6 +102,21 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 #drumBtn,#metBtn{width:46px; height:36px; border-radius:11px}
 #metBtn svg{width:25px; height:25px}
 #metBtn[aria-pressed="false"]{opacity:.45}
+/* listen switch: Parts (the six parts in the game sounds) or Backing (Melody + generated backing) */
+.hear{flex:none; display:inline-flex; flex-direction:column; justify-content:center; height:36px; padding:0 6px; margin-left:-2px; border:1.5px solid var(--ctl); border-radius:11px; background:var(--ctl); color:var(--ctl-ink); font-family:inherit; font-size:8.5px; font-weight:800; line-height:1.3; letter-spacing:0; text-transform:uppercase; cursor:pointer}
+.hear span{opacity:.4}
+.hear[data-h="parts"] span:first-child,.hear[data-h="backing"] span:last-child{opacity:1}
+/* narrow phones (360 px wide): tighten the transport so the listen switch fits beside undo and redo */
+@media (max-width:400px){
+  .bar{gap:3px}
+  .play{width:44px; height:44px}
+  .rew,.bar .icon{width:30px; height:30px}
+  .bpm{grid-template-columns:15px 40px 15px; margin-left:0}
+  .bpm button{width:15px}
+  .bpm input{width:40px; font-size:19px}
+  #metBtn{width:36px}
+  .hear{padding:0 5px}
+}
 /* ---- landscape editing (phone sideways, Edit tab): left rail + part strip + full-height piano roll ---- */
 .lrail,.lrmenu,.trk .pshort{display:none}
 @media (orientation:landscape) and (max-height:520px){
@@ -110,6 +125,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
     width:calc(48px + env(safe-area-inset-left,0px)); padding:4px 0 4px env(safe-area-inset-left,0px); overflow-y:auto; background:var(--bg-2); border-right:1px solid var(--line)}
   body.tab-edit .lr{width:38px; height:30px; flex:none; display:grid; place-items:center; padding:0; border:0; border-radius:8px; background:transparent; color:var(--text); font-size:20px; line-height:1}
   body.tab-edit .lr svg{width:20px; height:20px}
+  body.tab-edit .lr[data-lr="hear"]{font-size:9px; font-weight:800; letter-spacing:0}
   body.tab-edit .lr[data-lr="smart"]{font-size:10px; font-weight:800; letter-spacing:.02em}
   body.tab-edit .lr[data-lr="smart"][aria-pressed="true"]{background:var(--mel); color:var(--mel-ink)}
   body.tab-edit .lr[data-lr="keys"] svg{width:28px; height:16px}
@@ -967,6 +983,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
   <button type="button" class="lr lrplay" data-lr="play" aria-label="Play"></button>
   <button type="button" class="lr" data-lr="rew" aria-label="Back to the start"></button>
   <button type="button" class="lr" data-lr="met" aria-label="Metronome" aria-pressed="false"></button>
+  <button type="button" class="lr" data-lr="hear" aria-label="Listen to: Parts or Backing">Parts</button>
   <span class="lrsep"></span>
   <button type="button" class="lr" data-lr="smart" aria-label="Smart tool (off: view lock)" aria-pressed="true"></button>
   <span class="lrsep"></span>
@@ -996,6 +1013,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
     </div>
     <span class="sp"></span>
     <button class="tgl" id="metBtn" type="button" aria-pressed="false" aria-label="Metronome" title="Metronome"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9.2 2.8h5.6l4.6 18.4H4.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6.3 15.6h11.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 15.6 17.6 5.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="15.9" cy="8.5" r="1.7" fill="currentColor"/></svg></button>
+    <button class="hear" id="hearBtn" type="button" aria-label="Listen to: Parts or Backing" title="Switch between the six parts and the generated backing"><span>Parts</span><span>Backing</span></button>
     <button class="tgl" id="drumBtn" type="button" aria-pressed="false" aria-label="Drums"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><ellipse cx="12" cy="11.2" rx="9.8" ry="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.2 11.2v7.4c0 1.8 4.4 3.2 9.8 3.2s9.8-1.4 9.8-3.2v-7.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 14.4v6.2M12 14.6v7M17 14.4v6.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6.2 3.6L10.4 10.2M17.8 3.6L13.6 10.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10.8" cy="10.9" r="1.2" fill="currentColor"/><circle cx="13.2" cy="10.9" r="1.2" fill="currentColor"/></svg></button>
     <span class="sp"></span>
     <button class="icon" id="undoBtn" type="button" aria-label="Undo"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1098,9 +1116,8 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
     </div>
     <div class="panel ens" id="ensPanel">
-      <div class="ensr"><span class="lbl">Convert</span><label class="ensg">Hear the backing<button type="button" class="tg" id="togGuide" role="switch" aria-checked="true" aria-label="Hear the backing"></button></label></div>
-      <button class="btn primary" id="btnBake" type="button">Convert to Parts</button>
-      <p class="hint" id="bakeHint">Bass → Chord 1, keys or guitar → Chord 2–3, strings → Chord 4–5 (only one of them: Chord 2–5). Chords and backing stay, so you can convert again anytime.</p>
+      <div class="ensr"><span class="lbl">Parts</span></div>
+      <p class="hint" id="bakeHint">Chord 1–5 follow this arrangement: bass → Chord 1, keys or guitar → Chord 2–3, strings → Chord 4–5 (only one of them: Chord 2–5). Any change here updates them, and replaces edits made to them in Edit. The Melody part is never touched.</p>
     </div>
   </section>
 
@@ -1266,7 +1283,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.0 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.1 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -3073,7 +3090,8 @@ const Core=(function(){
       if(dp)drumsAt(a.view,a.local,dp).forEach(function(e){
         const t0=s*(PPQ/2)+Math.round(e.off*PPQ)+off;if(t0<0)return;
         dn.push({t:t0,e:Math.min(total,t0+60),st:0x99,n:e.n,v:(e.vel>=45&&!e.nf&&(e.n===35||e.n===36||e.n===37||e.n===38||e.n===40))?100:Math.max(1,Math.min(127,e.vel))});});
-      if(s<0||p.guide===false)continue;
+      /* MML Note: Chord 1–5 already carry the backing, so the MIDI file has the six parts only */
+      continue;
       eventsAt(a.view,a.local,dp).forEach(function(e){
         const t0=s*(PPQ/2)+Math.round((e.off||0)*PPQ)+off, t1=Math.min(total,t0+Math.max(1,Math.round(e.dur*PPQ)));
         (e.k==='c'?cn:e.k==='s'?sn:bn).push({t:t0,e:t1,st:e.k==='c'?0x90:e.k==='s'?0x93:0x91,n:e.midi,v:Math.max(1,Math.min(127,Math.round(e.vel)))});
@@ -3268,7 +3286,7 @@ const Core=(function(){
     p.sample=!!o.sample;
     /* six ensemble tracks (track 1 = melody); p.mel is the track being edited (not saved: see bindMel) */
     p.tracks=[];for(let i=0;i<NTRK;i++){const src=Array.isArray(o.tracks)&&Array.isArray(o.tracks[i])?o.tracks[i]:(i===0?o.mel:null);p.tracks.push(fitMel(src,128*MB.bar,i===0?-MB.bar:0));}
-    p.guide=o.guide==null?true:!!o.guide;
+    p.guide=!!o.guide;  /* listening: false = the six parts, true = Melody + generated backing */
     p.pinst=[];for(let i=0;i<NTRK;i++){const v=Array.isArray(o.pinst)?o.pinst[i]:null;p.pinst.push(INSTS.indexOf(v)>=0?v:'lute');}
     const mo=o.mml&&typeof o.mml==='object'?o.mml:{};const av=Array.isArray(mo.acc)&&mo.acc.length===3?mo.acc.map(function(x){return Math.max(1,Math.min(15,x|0));}):[15,12,9];
     p.mml={limit:[1200,2400].indexOf(mo.limit)>=0?mo.limit:2400,useN:mo.useN!==false,accent:mo.accent!==false,acc:av};
@@ -3750,7 +3768,26 @@ const serialize=function(){Core.storeCur(P);return JSON.stringify(P);};
 /* run fn once per ensemble track with P.mel pointing at it (structural edits move every track together) */
 function eachTrack(fn){const k=Core.curTrack();try{for(let i=0;i<Core.NTRK;i++){Core.setCurTrack(i);fn(i);}}finally{Core.setCurTrack(k);}}
 let growing=false;
-function persist(){mmlSoon();
+/* Chord 1–5 always follow the arrangement (chords, style, sections, key, meter...): whenever it changes they are
+   converted again. Notes, mixer, instruments and the listening choice do not count. A project that is loaded, opened or
+   restored by Undo keeps its parts as they are until the arrangement changes. */
+let bakeP=null, bakeSig='';
+const SIG_SKIP={tracks:1,mel:1,guide:1,mix:1,mml:1,name:1,id:1,sample:1,takes:1,recN:1,pinst:1,melAmt:1,slot:1,dp:1};
+function arrSig(){
+  Core.storeCur(P);const x=Core.secOf(P,Core.curId(P)), sec={}, o={};
+  if(x)Object.keys(x).forEach(function(k){if(k!=='id')sec[k]=1;});
+  Object.keys(P).forEach(function(k){if(!SIG_SKIP[k]&&!sec[k])o[k]=P[k];});
+  return JSON.stringify(o);
+}
+function autoBake(){
+  const sg=arrSig(), empty=!P.tracks.slice(1).some(function(t){return t.length;});
+  if(bakeP!==P){bakeP=P;bakeSig=sg;if(!empty)return false;}
+  else if(sg===bakeSig)return false;
+  bakeSig=sg;
+  const r=Core.bake(P);for(let i=0;i<5;i++)P.tracks[i+1]=r.tracks[i]||[];
+  return true;
+}
+function persist(){if(autoBake())setTimeout(renderAll,0);mmlSoon();
   /* Chord Track on Loop: notes drawn after the song get copies of the looped slot under them */
   if(!growing&&inMelody()&&U.cmode==='loop'&&P.mel.length){
     const ft=Core.formTicks(P);
@@ -4172,7 +4209,7 @@ function schedule(step,t){
   if(a&&step>=0){chordAuto(a.view.comp,Core.instP(a.view));bassAuto(a.view.bpat,a.view.bkind);strAuto(a.view.str);const dq=Core.secDrums(a.view,U.drum?U.dpat:null);if(dq)kitAuto(Core.kitOf({dpat:dq,dkit:a.view.dkit}));}
   /* the first bar after Play or a jump has no pushed chord before it, so it is struck */
   if(a&&step>=0&&Math.floor(step/bs)===Math.floor(tieFrom/bs))a.view._noTie=true;
-  const evs=a&&step>=0&&P.guide?Core.eventsAt(a.view,a.local,dp):[], ms=[].concat.apply([],P.tracks.map(function(tr,i){return Core.melAt(P,step,tr).map(function(e){e.k='t'+(i+1);return e;});})), dr=dp?Core.drumsAt(a.view,a.local,dp):[];
+  const evs=a&&step>=0&&P.guide?Core.eventsAt(a.view,a.local,dp):[], ms=[].concat.apply([],P.tracks.map(function(tr,i){if(P.guide&&i>0)return [];return Core.melAt(P,step,tr).map(function(e){e.k='t'+(i+1);return e;});})), dr=dp?Core.drumsAt(a.view,a.local,dp):[];
   takeAt(step,t);
   if(!evs.length&&!ms.length&&!dr.length)return;
   const spb=60/(a&&a.view.bpm?a.view.bpm:bpmAt(step*240)), jc=jit(), jb=jit();
@@ -4908,7 +4945,7 @@ $('#jitter').addEventListener('change',commitLive);
 let lastRand=-1;
 /* The dice fills the slot with a random progression; when the slot has melody it becomes Suggest instead,
    which fills the empty cells with chords that fit that melody (tap again: the next alternative). */
-function slotMel(){const r=slotRange();return P.mel.filter(function(n){return n.s<r.t1&&n.s+n.l>r.t0;}).map(function(n){return {s:n.s-r.t0,l:n.l,p:n.p};});}
+function slotMel(){const r=slotRange();return P.tracks[0].filter(function(n){return n.s<r.t1&&n.s+n.l>r.t0;}).map(function(n){return {s:n.s-r.t0,l:n.l,p:n.p};});}
 function renderRandBtn(){
   const b=$('#btnRand'), sug=slotMel().length>0;
   b.classList.toggle('sug',sug);b.querySelector('.rl').textContent=sug?'Suggest':'Random';
@@ -4957,7 +4994,7 @@ function doRandom(mode){
   /* a fresh sketch (one slot, no melody): major or minor at random too; once the song has grown, key and scale stay */
   let scTag='';const said=[];
   /* major 70%, natural minor 15%, harmonic minor 15%; C major or A minor, so it stays on the white keys as much as possible */
-  if(doC&&P.form.length===1&&!P.mel.length){const q=Math.random(), sc=q<0.7?'major':q<0.85?'minor':'harm';if(sc!==P.scale)lastRand=-1;P.scale=sc;P.key=sc==='major'?0:9;
+  if(doC&&P.form.length===1&&!P.tracks[0].length){const q=Math.random(), sc=q<0.7?'major':q<0.85?'minor':'harm';if(sc!==P.scale)lastRand=-1;P.scale=sc;P.key=sc==='major'?0:9;
     scTag=(sc==='major'?'C major':sc==='minor'?'A minor':'A harm. minor')+' · ';}
   if(doC){const r=Core.randomChords(P,Math.random,lastRand);
   lastRand=r.i;P.chords=r.chords;P.sample=false;said.push(scTag+r.names);}
@@ -7585,6 +7622,7 @@ function isLandEdit(){return LAND_MQ.matches&&document.body.classList.contains('
     if(k==='more'){const open=menu.hidden;menu.hidden=!open;b.setAttribute('aria-expanded',open?'true':'false');if(open)sync();return;}
     menu.hidden=true;
     if(k==='play')$('#playBtn').click();
+    else if(k==='hear')$('#hearBtn').click();
     else if(k==='smart'){U.rtool=U.rtool==='smart'?'pan':'smart';saveU();smHidePop();renderMelOpts();sync();}
     else $(src[k]).click();
   });
@@ -7666,7 +7704,6 @@ function mmlRun(){
   const extra=[];
   if((P.secs||[]).some(function(x){return x.tempo!=null&&x.tempo!==P.bpm;}))extra.push({level:'warn',code:'SEC_TEMPO',track:null,message:'Some sections have their own tempo. MML uses one tempo ('+P.bpm+') for the whole song.'});
   if(S.pick)extra.push({level:'info',code:'PICKUP',track:null,message:'The pickup bar becomes bar 1 in MML.'});
-  if(P.guide&&!P.tracks.slice(1).some(function(t){return t.length;}))extra.push({level:'info',code:'NOT_BAKED',track:null,message:'The backing is not in the MML until you convert it to parts (Arrange › Ensemble › Convert to Parts).'});
   MM={k:k,enc:enc,lint:{ok:lint.ok,issues:lint.issues.concat(extra),stats:lint.stats}};
   return MM;
 }
@@ -7730,16 +7767,9 @@ function importMml(txt){
 }
 (function(){const is=$('#instSel');Core.INSTS.forEach(function(k){const o=document.createElement('option');o.value=k;o.textContent=INST_NAME[k];is.appendChild(o);});
   is.addEventListener('change',function(){P.pinst[Core.curTrack()]=is.value;Aud.setInsts(P.pinst);persist();try{Aud.audition('t'+(Core.curTrack()+1));}catch(e){}});})();
-function renderEns(){Aud.setInsts(P.pinst);const g=$('#togGuide');if(g)g.setAttribute('aria-checked',P.guide?'true':'false');renderTrkRow();mmlStatus();}
-$('#togGuide').addEventListener('click',function(){P.guide=!P.guide;persist();renderEns();});
-var bakeArm=0;
-$('#btnBake').addEventListener('click',function(){
-  const has=P.tracks.slice(1).some(function(t){return t.length;});
-  if(has&&Date.now()-bakeArm>3500){bakeArm=Date.now();toast('Chord 1–5 already have notes. Tap Convert again to replace them (Undo brings them back).');return;}
-  bakeArm=0;if(playing)stopPlay();
-  let r=null;edit(function(){r=Core.bake(P);for(let i=0;i<5;i++)P.tracks[i+1]=r.tracks[i]||[];P.guide=false;});
-  toast('Converted bass and '+(r.strings?'keys + strings':'keys')+' into Chord 1–5'+(r.moved?' · '+r.moved+' moved an octave':'')+(r.dropped?' · '+r.dropped+' dropped':'')+'. Backing sound is off.');
-});
+function hearUI(){const v=P.guide?'backing':'parts';['#hearBtn'].forEach(function(q){const b=$(q);if(b){b.dataset.h=v;b.setAttribute('aria-pressed',P.guide?'true':'false');}});const r=document.querySelector('#lrail [data-lr="hear"]');if(r){r.dataset.h=v;r.textContent=P.guide?'Backing':'Parts';}}
+$('#hearBtn').addEventListener('click',function(){P.guide=!P.guide;persist();hearUI();toast(P.guide?'Listening to the backing (Melody + generated backing).':'Listening to the six parts.');});
+function renderEns(){Aud.setInsts(P.pinst);hearUI();renderTrkRow();mmlStatus();}
 $('#btnMml').addEventListener('click',function(){setSheet('mml');});
 
 /* ---------- mixer: Melody MIDI, Melody Audio, Chords, Bass, Drums, Reverb, Master (kept in the project) ---------- */
