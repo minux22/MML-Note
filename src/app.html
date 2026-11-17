@@ -90,9 +90,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 .bpm input{width:42px; height:32px; border:0; background:transparent; color:var(--ctl); text-align:center; font-family:var(--mono); font-size:21px; font-weight:700; padding:0; -moz-appearance:textfield}
 .tgl{width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:var(--panel-2); color:var(--dim); display:grid; place-items:center; padding:0; flex:none}
 .tgl svg{display:block}
-#drumBtn,#metBtn{width:46px; height:36px; border-radius:11px}
-#metBtn svg{width:25px; height:25px}
-#metBtn[aria-pressed="false"]{opacity:.45}
+#drumBtn{width:46px; height:36px; border-radius:11px}
 /* listen switch: Parts (the six parts in the game sounds) or Backing (Melody + generated backing) */
 .hear{flex:none; display:inline-flex; flex-direction:column; justify-content:center; height:36px; padding:0 6px; border:1.5px solid var(--ctl); border-radius:11px; background:var(--ctl); color:var(--ctl-ink); font-family:inherit; font-size:8.5px; font-weight:800; line-height:1.3; letter-spacing:0; text-transform:uppercase; cursor:pointer}
 .hear span{opacity:.4}
@@ -105,7 +103,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
   .bpm{grid-template-columns:15px 40px 15px; margin-left:0}
   .bpm button{width:15px}
   .bpm input{width:40px; font-size:19px}
-  #metBtn{width:36px}
+  #drumBtn{width:36px}
   .hear{padding:0 5px}
 }
 /* ---- landscape editing (phone sideways, Edit tab): left rail + part strip + full-height piano roll ---- */
@@ -122,7 +120,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
   body.tab-edit .lr[data-lr="keys"] svg{width:28px; height:16px}
   body.tab-edit .lr[hidden]{display:none}
   body.tab-edit .lr[aria-pressed="true"]{background:var(--ctl); color:var(--ctl-ink)}
-  body.tab-edit .lr[data-lr="met"][aria-pressed="false"]{opacity:.45}
+  body.tab-edit .lr[data-lr="drum"][aria-pressed="false"]{opacity:.45}
   body.tab-edit .lr:disabled{opacity:.3}
   body.tab-edit .lrplay{background:var(--ctl); color:var(--ctl-ink); border-radius:50%; width:34px; height:34px}
   body.tab-edit .lrplay.on{background:var(--rec); color:#fff}
@@ -194,9 +192,8 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 .impbtn:active{filter:brightness(.92)}
 .mmlst{font:700 11px var(--mono); color:var(--dim); margin-left:6px}
 #mmlImp{width:100%; min-height:70px; font:12px var(--mono); border:1px solid var(--line); border-radius:8px; padding:8px; background:var(--panel-2); color:var(--text)}
-#drumBtn,[data-pt=rhythm],#pRhythm,[data-rm=rhythm]{display:none!important}
 /* SoundFont: one sound per game instrument (#ipRows); PhraseNote's per-track rows and presets stay hidden */
-#spBox,#drumNote,#sfRows .sfrow:has(#sfM),#sfRows .drow,#sfRows .sub{display:none!important}
+#spBox,#sfRows .sfrow:has(#sfM){display:none!important}
 #ensPanel{gap:2px}
 #bakeHint.aclist{list-style:none; text-align:left; margin:0; padding:0 4px}
 #bakeHint.aclist li{position:relative; padding-left:14px; line-height:1.5}
@@ -990,7 +987,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
   <button type="button" class="lr lrplay" data-lr="play" aria-label="Play"></button>
   <button type="button" class="lr" data-lr="hear" aria-label="Listen to: Song or Parts">Parts</button>
   <button type="button" class="lr" data-lr="rew" aria-label="Back to the start"></button>
-  <button type="button" class="lr" data-lr="met" aria-label="Metronome" aria-pressed="false"></button>
+  <button type="button" class="lr" data-lr="drum" aria-label="Drums" aria-pressed="false"></button>
   <span class="lrsep"></span>
   <button type="button" class="lr" data-lr="smart" aria-label="Smart tool (off: view lock)" aria-pressed="true"></button>
   <span class="lrsep"></span>
@@ -1020,7 +1017,6 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       <small>BPM</small>
     </div>
     <span class="sp"></span>
-    <button class="tgl" id="metBtn" type="button" aria-pressed="false" aria-label="Metronome" title="Metronome"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9.2 2.8h5.6l4.6 18.4H4.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6.3 15.6h11.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 15.6 17.6 5.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="15.9" cy="8.5" r="1.7" fill="currentColor"/></svg></button>
     <button class="tgl" id="drumBtn" type="button" aria-pressed="false" aria-label="Drums"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><ellipse cx="12" cy="11.2" rx="9.8" ry="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.2 11.2v7.4c0 1.8 4.4 3.2 9.8 3.2s9.8-1.4 9.8-3.2v-7.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 14.4v6.2M12 14.6v7M17 14.4v6.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6.2 3.6L10.4 10.2M17.8 3.6L13.6 10.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10.8" cy="10.9" r="1.2" fill="currentColor"/><circle cx="13.2" cy="10.9" r="1.2" fill="currentColor"/></svg></button>
     <span class="sp"></span>
     <button class="icon" id="undoBtn" type="button" aria-label="Undo"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1291,7 +1287,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.8 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.0 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -2598,7 +2594,7 @@ const Core=(function(){
     const first=secView(p,p.form[0]);
     for(let s=(hasPick?-sps:0);s<exBars*sps;s++){
       const a=s<0?{view:first,local:s}:songAt(p,s);if(!a)continue;
-      const dp=null;
+      const dp=secDrums(a.view,dpat);
       if(dp)drumsAt(a.view,a.local,dp).forEach(function(e){
         const t0=s*(PPQ/2)+Math.round(e.off*PPQ)+off;if(t0<0)return;
         dn.push({t:t0,e:Math.min(total,t0+60),st:0x99,n:e.n,v:(e.vel>=45&&!e.nf&&(e.n===35||e.n===36||e.n===37||e.n===38||e.n===40))?100:Math.max(1,Math.min(127,e.vel))});});
@@ -3284,7 +3280,7 @@ let growing=false;
    converted again. Notes, mixer, instruments and the listening choice do not count. A project that is loaded, opened or
    restored by Undo keeps its parts as they are until the arrangement changes. */
 let bakeP=null, bakeSig='', bakeKeep=false;  /* bakeKeep: the next change keeps the parts as they are (MML import) */
-const SIG_SKIP={tracks:1,mel:1,guide:1,mix:1,mml:1,name:1,id:1,sample:1,takes:1,recN:1,pinst:1,melAmt:1,slot:1,dp:1};
+const SIG_SKIP={drum:1,dpat:1,dkit:1,tracks:1,mel:1,guide:1,mix:1,mml:1,name:1,id:1,sample:1,takes:1,recN:1,pinst:1,melAmt:1,slot:1,dp:1};
 function arrSig(){
   Core.storeCur(P);const x=Core.secOf(P,Core.curId(P)), sec={}, o={};
   if(x)Object.keys(x).forEach(function(k){if(k!=='id')sec[k]=1;});
@@ -3713,12 +3709,10 @@ function schedule(step,t){
   if(REC.run&&REC.run.cinB!=null&&step>=REC.run.cinA&&step<REC.run.cinB){
     const k=step-REC.run.cinA;if(k%M0.sps===0)Aud.click(t,k===0,Core.posVel(P,(k%bs)*240));
   }
-  /* metronome: a click on every beat, accented on the downbeat (not during a count-in) */
-  if(U.metro&&!clicked&&!(rec.lead&&step<cinTo)){const k=((step%bs)+bs)%bs;if(k%M0.sps===0)Aud.click(t,k===0,null);}
   /* chords loop; the melody runs straight through (on the Chord Track only with Mel on) */
   /* the Melody Track's loop chain (copies of one slot, wrapping) pushes and ties across its seam like the Chord Track's Loop; while a recording grows it the real neighbours decide */
   const loopMel=melLoopOn()&&!rec.on&&!(REC.run&&REC.run.b==null);
-  const a=step>=0?Core.songAt(P,step,(!inMelody()&&U.cmode!=='song')||loopMel):{view:Core.secView(P,P.form[0]),local:step}, dp=null;
+  const a=step>=0?Core.songAt(P,step,(!inMelody()&&U.cmode!=='song')||loopMel):{view:Core.secView(P,P.form[0]),local:step}, dp=a?Core.secDrums(a.view,null):null;
   if(a&&step>=0){chordAuto(a.view.comp,Core.instP(a.view));bassAuto(a.view.bpat,a.view.bkind);strAuto(a.view.str);const dq=Core.secDrums(a.view,U.drum?U.dpat:null);if(dq)kitAuto(Core.kitOf({dpat:dq,dkit:a.view.dkit}));}
   /* the first bar after Play or a jump has no pushed chord before it, so it is struck */
   if(a&&step>=0&&Math.floor(step/bs)===Math.floor(tieFrom/bs))a.view._noTie=true;
@@ -4386,7 +4380,6 @@ $('#rewBtn').addEventListener('click',function(){
   if(playing)seekPlay();
   showCursor(true);
 });
-$('#metBtn').addEventListener('click',function(){U.metro=!U.metro;saveU();this.setAttribute('aria-pressed',U.metro?'true':'false');});
 $('#drumBtn').addEventListener('click',function(){setDrums(!U.drum);renderTop();renderParts();renderRhythm();if(U.drum&&!playing){Aud.ensure();Aud.audition('d');}});
 
 /* Rhythm tab: the drum pattern of this slot (the button beside BPM only turns the drums on and off) */
@@ -4566,9 +4559,9 @@ if([16,8,4,2,1].indexOf(U.nv)<0)U.nv=4;
 U.dot=!!U.dot&&U.nv>1;if([0,1,-1,2].indexOf(U.acc)<0)U.acc=0;
 U.drum=!!U.drum;U.abuf=['interactive','balanced','playback'].indexOf(U.abuf)<0?'balanced':U.abuf;if(!Core.DPATS.some(function(d){return d[0]===U.dpat;}))U.dpat='rock8';U.clk=Math.max(0,Math.min(100,Math.round(+U.clk||0)));
 try{if(!localStorage.getItem('mmlnote-styask-apply')){U.styAsk='all';localStorage.setItem('mmlnote-styask-apply','1');}}catch(e){}
-U.styAsk=['ask','all','style'].indexOf(U.styAsk)<0?'all':U.styAsk;U.rmode=['all','chords','style'].indexOf(U.rmode)<0?'all':U.rmode;
-U.drum=false;if(U.ptab==='rhythm')U.ptab='keys';if(U.view==='rec')U.view='roll';
-U.trk=Math.max(0,Math.min(5,U.trk|0));Core.setCurTrack(U.trk);U.metro=!!U.metro;$('#metBtn').setAttribute('aria-pressed',U.metro?'true':'false');
+U.styAsk=['ask','all','style'].indexOf(U.styAsk)<0?'all':U.styAsk;U.rmode=['all','chords','style','rhythm'].indexOf(U.rmode)<0?'all':U.rmode;
+if(U.view==='rec')U.view='roll';
+U.trk=Math.max(0,Math.min(5,U.trk|0));Core.setCurTrack(U.trk);
 U.qStr=Math.max(0,Math.min(100,Math.round(+U.qStr||0)));U.qLen=U.qLen!==false;U.melc=U.melc!==false;U.more=!!U.more;U.cmode=U.cmode==='song'?'song':'loop';
 /* new starting setup (applied once to settings saved earlier): Roll view, Len 8, Snap 8, keyboard on, pickup off, auto-velocity on */
 try{if(!localStorage.getItem('mmlnote-init-1')){U.view='roll';U.snap=240;U.len=240;U.kbd=false;P.pick=false;localStorage.setItem('mmlnote-init-1','1');persist();saveU();}}catch(e){}
@@ -4577,9 +4570,9 @@ try{if(!localStorage.getItem('mmlnote-kst-g3')){U.kst=25;localStorage.setItem('m
 U.kst=Math.max(7,Math.min(42,Math.round(+U.kst||25)));U.krq=[0,120,240,480].indexOf(+U.krq)<0?120:+U.krq;U.kmode=U.kmode==='step'?'step':'live';U.kcount=U.kcount!==false;U.lat=Math.max(0,Math.min(400,Math.round(+U.lat||0)));U.kbd=!!U.kbd;U.qopen=!!U.qopen;
 function saveU(){try{localStorage.setItem('mmlnote-ui',JSON.stringify(U));}catch(e){}}
 /* drums on/off and the pattern belong to the project; U keeps the last choice for projects saved before that */
-function setDrums(on,pat){on=false;U.drum=!!on;if(pat)U.dpat=pat;P.drum=U.drum;P.dpat=U.dpat;saveU();persist();}
+function setDrums(on,pat){U.drum=!!on;if(pat)U.dpat=pat;P.drum=U.drum;P.dpat=U.dpat;saveU();persist();}
 function drumsFromP(){
-  U.drum=false;P.drum=false;
+  if(typeof P.drum==='boolean')U.drum=P.drum;else P.drum=U.drum;
   if(P.dpat)U.dpat=P.dpat;else P.dpat=U.dpat;
   saveU();const d=$('#dPat');if(d&&d.value!==U.dpat)d.value=U.dpat;
 }
@@ -6962,7 +6955,7 @@ function pvPlay(n,at,mel,from){
   const t0=ts[0];
   for(let s=0;s<n;s++){
     const a=at(s), t=ts[s], spb=sp[s];if(!a)continue;
-    const dp=null;
+    const dp=Core.secDrums(a.view,null);
     Core.eventsAt(a.view,a.local,dp).forEach(function(e){Aud.note(e.k,e.midi,e.vel,t+(e.off||0)*spb,e.dur*spb,e.vel);});
     if(dp)Core.drumsAt(a.view,a.local,dp).forEach(function(d){Aud.drum(d.n,d.vel,t+d.off*spb,d.vel,d.nf);});
     if(from!=null)Core.melAt(P,from+s).forEach(function(e){Aud.note('m',e.midi,e.vel,t+e.off*spb,e.dur*spb,e.vel);});
@@ -7115,12 +7108,12 @@ const LAND_MQ=window.matchMedia('(orientation:landscape) and (max-height:520px)'
 function isLandEdit(){return LAND_MQ.matches&&document.body.classList.contains('tab-edit');}
 (function(){
   const rail=$('#lrail'), menu=$('#lrMenu'), B=function(k){return rail.querySelector('[data-lr="'+k+'"]');};
-  const src={rew:'#rewBtn',met:'#metBtn',undo:'#undoBtn',redo:'#redoBtn',mix:'#dockMix',keys:'#dockKeys'};
+  const src={rew:'#rewBtn',drum:'#drumBtn',undo:'#undoBtn',redo:'#redoBtn',mix:'#dockMix',keys:'#dockKeys'};
   Object.keys(src).forEach(function(k){const el=$(src[k]).querySelector('svg');if(el)B(k).innerHTML=el.outerHTML;});
 
   function sync(){
     const pb=$('#playBtn');B('play').innerHTML=pb.innerHTML;B('play').classList.toggle('on',pb.classList.contains('on'));B('play').setAttribute('aria-label',pb.getAttribute('aria-label')||'Play');
-    B('met').setAttribute('aria-pressed',$('#metBtn').getAttribute('aria-pressed'));
+    B('drum').setAttribute('aria-pressed',$('#drumBtn').getAttribute('aria-pressed'));
     B('smart').setAttribute('aria-pressed',U.rtool==='smart'?'true':'false');B('smart').textContent=U.rtool==='smart'?'Smart':'View';
     B('keys').hidden=$('#dockKeys').hidden;B('keys').setAttribute('aria-pressed',$('#dockKeys').getAttribute('aria-expanded')==='true'?'true':'false');
     B('undo').disabled=$('#undoBtn').disabled;B('redo').disabled=$('#redoBtn').disabled;
@@ -7129,7 +7122,7 @@ function isLandEdit(){return LAND_MQ.matches&&document.body.classList.contains('
     li.value=P.pinst[Core.curTrack()];
   }
   const mo=new MutationObserver(sync);
-  ['#playBtn','#metBtn','#undoBtn','#redoBtn','#toolSeg','#viewSeg','#dockKeys','#trkRow','#toolSeg2'].forEach(function(q){mo.observe($(q),{attributes:true,childList:true,subtree:true});});
+  ['#playBtn','#drumBtn','#undoBtn','#redoBtn','#toolSeg','#viewSeg','#dockKeys','#trkRow','#toolSeg2'].forEach(function(q){mo.observe($(q),{attributes:true,childList:true,subtree:true});});
   rail.addEventListener('click',function(e){
     const b=e.target.closest('.lr');if(!b)return;const k=b.dataset.lr;
     if(k==='more'){const open=menu.hidden;menu.hidden=!open;b.setAttribute('aria-expanded',open?'true':'false');if(open)sync();return;}
@@ -7289,7 +7282,7 @@ $('#btnMml').addEventListener('click',function(){setSheet('mml');});
 
 /* ---------- mixer: Melody MIDI, Melody Audio, Chords, Bass, Drums, Reverb, Master (kept in the project) ---------- */
 var MIX={open:false};
-var MXCH=[['t1','Melody',''],['t2','Bass','Chord 1'],['t3','Alto','Chord 2'],['t4','Tenor','Chord 3'],['t5','Extra','Chord 4'],['t6','Extra','Chord 5']];
+var MXCH=[['t1','Melody',''],['t2','Bass','C1'],['t3','Alto','C2'],['t4','Tenor','C3'],['t5','Extra','C4'],['t6','Extra','C5'],['d','Drums','']];
 function mixDbText(v){const d=Core.faderDb(v);return d===-Infinity?'−∞':(d>0?'+':'')+d.toFixed(1);}
 /* fader, mute and solo into the channel buses; reverb and master as before */
 function applyMix(){
