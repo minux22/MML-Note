@@ -191,6 +191,15 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 .mtrk.t1{--tc:var(--t1)} .mtrk.t2{--tc:var(--t2)} .mtrk.t3{--tc:var(--t3)} .mtrk.t4{--tc:var(--t4)} .mtrk.t5{--tc:var(--t5)} .mtrk.t6{--tc:var(--t6)}
 .over{color:#ff5d50; font-weight:800}
 .accs{display:flex; gap:8px} .accs label{display:flex; flex-direction:column; align-items:center; gap:2px; font-size:11px; color:var(--dim)} .accs select{min-width:54px}
+.accbox{gap:10px}
+.accrow{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.accrow .tg{margin:0}
+.mmlbtns{display:flex; gap:8px; margin:8px 0}
+.mmlbtns .btn{flex:1 1 auto; margin:0; white-space:nowrap; padding:0 10px}
+.impwrap{position:relative}
+.impwrap #mmlImp{display:block; padding-bottom:34px}
+.impbtn{position:absolute; right:8px; bottom:8px; height:24px; padding:0 12px; border:0; border-radius:5px; background:#f5c542; color:#231a00; font-size:12px; font-weight:800; cursor:pointer}
+.impbtn:active{filter:brightness(.92)}
 .mmlst{font:700 11px var(--mono); color:var(--dim); margin-left:6px}
 #mmlImp{width:100%; min-height:70px; font:12px var(--mono); border:1px solid var(--line); border-radius:8px; padding:8px; background:var(--panel-2); color:var(--text)}
 #drumBtn,[data-pt=rhythm],#pRhythm,[data-rm=rhythm]{display:none!important}
@@ -1288,7 +1297,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.5 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.6 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -7734,14 +7743,15 @@ function renderMml(){
   items.forEach(function(x){h+='<div class="iss '+x.level+'"'+(x.track?' data-t="'+(x.track-1)+'"':'')+'>'+(x.track?'<b>'+TRK_NAME[x.track-1]+'</b>':'')+esc(x.message)+'</div>';});
   h+='<div class="sbox throw"><span class="lbl">Limit</span><div class="seg" id="mmlLim" role="group" aria-label="Characters per track"></div></div>';
   h+='<div class="sbox throw"><span class="lbl">Use n</span><button type="button" class="tg" id="mmlN" role="switch" aria-checked="'+(P.mml.useN?'true':'false')+'" aria-label="Use n notes"></button></div>';
-  h+='<div class="sbox throw"><span class="lbl">Accent</span><button type="button" class="tg" id="mmlAcc" role="switch" aria-checked="'+(P.mml.accent?'true':'false')+'" aria-label="Accent with volume"></button></div>';
-  if(P.mml.accent)h+='<div class="sbox throw accv"><span class="lbl">Volume</span><span class="accs">'+['Strong','Medium','Weak'].map(function(nm,i){let o='';for(let v=15;v>=1;v--)o+='<option'+(v===P.mml.acc[i]?' selected':'')+'>'+v+'</option>';return '<label>'+nm+'<select data-acc="'+i+'">'+o+'</select></label>';}).join('')+'</span></div>';
-  h+='<button class="btn primary" type="button" id="mmlAll">Copy MML@ (all parts)</button><button class="btn" type="button" id="mmlSave">Save MML file (.txt)</button>';
+  h+='<div class="sbox accbox"><div class="accrow"><span class="lbl">Accent</span><button type="button" class="tg" id="mmlAcc" role="switch" aria-checked="'+(P.mml.accent?'true':'false')+'" aria-label="Accent with volume"></button></div>';
+  if(P.mml.accent)h+='<div class="accrow accv"><span class="lbl">Volume</span><span class="accs">'+['Strong','Medium','Weak'].map(function(nm,i){let o='';for(let v=15;v>=1;v--)o+='<option'+(v===P.mml.acc[i]?' selected':'')+'>'+v+'</option>';return '<label>'+nm+'<select data-acc="'+i+'">'+o+'</select></label>';}).join('')+'</span></div>';
+  h+='</div>';
+  h+='<div class="mmlbtns"><button class="btn primary" type="button" id="mmlAll">Copy MML@ (all parts)</button><button class="btn" type="button" id="mmlSave">Save MML file (.txt)</button></div>';
   r.enc.parts.forEach(function(p,i){
     h+='<div class="mtrk t'+(i+1)+'"><div class="hd"><b>'+TRK_NAME[i]+'</b><small class="'+(p.length>lim?'over':'note')+'">'+p.length+' / '+lim+'</small><span class="sp"></span>'+
       '<button class="pill" type="button" data-copy="'+i+'"'+(p?'':' disabled')+'>Copy</button></div>'+(p?'<code>'+esc(p)+'</code>':'')+'</div>';
   });
-  h+='<div class="sec"><span class="lbl">Import MML</span></div><textarea id="mmlImp" placeholder="MML@…,…;  or one track per line"></textarea><button class="btn" type="button" id="mmlDoImp">Import (replaces all tracks)</button>';
+  h+='<div class="sec"><span class="lbl">Import MML</span></div><div class="impwrap"><textarea id="mmlImp" placeholder="MML@…,…;  or one track per line"></textarea><button class="impbtn" type="button" id="mmlDoImp" title="Replaces all six parts">Import</button></div>';
   b.innerHTML=h;
   mkSeg($('#mmlLim'),[[1200,'1200'],[2400,'2400']],function(){return P.mml.limit;},function(v){P.mml.limit=v;persist();MM=null;mmlSoon();renderMml();});
   $('#mmlN').addEventListener('click',function(){P.mml.useN=!P.mml.useN;persist();MM=null;renderMml();});
