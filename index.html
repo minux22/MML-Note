@@ -105,7 +105,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 /* listen switch: Parts (the six parts in the game sounds) or Backing (Melody + generated backing) */
 .hear{flex:none; display:inline-flex; flex-direction:column; justify-content:center; height:36px; padding:0 6px; border:1.5px solid var(--ctl); border-radius:11px; background:var(--ctl); color:var(--ctl-ink); font-family:inherit; font-size:8.5px; font-weight:800; line-height:1.3; letter-spacing:0; text-transform:uppercase; cursor:pointer}
 .hear span{opacity:.4}
-.hear[data-h="parts"] span:first-child,.hear[data-h="backing"] span:last-child{opacity:1}
+.hear[data-h="song"] span:first-child,.hear[data-h="parts"] span:last-child{opacity:1}
 /* narrow phones (360 px wide): tighten the transport so the listen switch fits beside undo and redo */
 @media (max-width:400px){
   .bar{gap:3px}
@@ -159,20 +159,20 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
   body.tab-edit .sheet{bottom:0; left:calc(48px + env(safe-area-inset-left,0px))}
 }
 /* MML Note: no drums, no rhythm part, no audio recording */
-:root{--t1:#e8578f;--t2:#4d8ff5;--t3:#34b98a;--t4:#a46ee8;--t5:#e8a33b;--t6:#3fb3c8}
+:root{--t1:#f3a3c2;--t2:#9fc0f5;--t3:#93d6b9;--t4:#c9adf2;--t5:#f4cd8f;--t6:#97d4e0;--t-ink:#2b2420}
 .trkrow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; padding:0}
 .trkrow::-webkit-scrollbar{display:none}
 .trk{display:flex; flex-direction:column; align-items:flex-start; gap:0; line-height:1.2; min-width:0; padding:5px 8px 5px 8px; border-radius:12px;
   border:1px solid var(--line); border-left:5px solid var(--tc); background:var(--panel-2); color:var(--text); font-weight:800; font-size:13px; text-align:left}
 .trk small{font:600 10px var(--mono); color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
-.trk[aria-pressed="true"]{background:var(--tc); border-color:var(--tc); color:#fff}
-.trk[aria-pressed="true"] small{color:rgba(255,255,255,.85)}
+.trk[aria-pressed="true"]{background:var(--tc); border-color:var(--tc); color:var(--t-ink)}
+.trk[aria-pressed="true"] small{color:color-mix(in srgb,var(--t-ink) 70%,transparent)}
 .trk .er{color:#ff5d50; margin-left:3px}
-.trk[aria-pressed="true"] .er{color:#fff}
+.trk[aria-pressed="true"] .er{color:#c0392b}
 .trk.t1,.nt.t1{--tc:var(--t1)} .trk.t2,.nt.t2{--tc:var(--t2)} .trk.t3,.nt.t3{--tc:var(--t3)}
 .trk.t4,.nt.t4{--tc:var(--t4)} .trk.t5,.nt.t5{--tc:var(--t5)} .trk.t6,.nt.t6{--tc:var(--t6)}
 .nt.cur{background:var(--tc)}
-.nt.gh{background:var(--tc); opacity:.32; box-shadow:none; pointer-events:none}
+.nt.gh{background:var(--tc); opacity:.45; box-shadow:none; pointer-events:none}
 .nt.cl{box-shadow:0 0 0 2px #ff3b30, inset 0 0 0 1px rgba(0,0,0,.25)}
 .instrow{display:flex; align-items:center; gap:10px; margin:0 2px}
 #instSel{width:auto; min-width:0; flex:none; padding-right:28px}
@@ -766,9 +766,9 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
 #staffCtl .stgrid button:not(.tg){height:32px; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--text); font-size:18px; display:grid; place-items:center}
 #staffCtl .stgrid .sttool{grid-column:span 3; justify-self:start; align-self:center}
 /* Smart tool switch: a dark outlined chip so it stands out (Roll and Staff) */
-.smchip{display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 5px 0 11px; border:1.5px solid var(--ctl); border-radius:999px; background:var(--ctl); cursor:pointer; -webkit-tap-highlight-color:transparent; box-sizing:border-box}
-.smchip .lbl,#staffCtl .smchip .lbl{font-size:10px; letter-spacing:0; white-space:nowrap; color:var(--ctl-ink); margin:0}
-.smchip .tg,#staffCtl .stgrid .smchip .tg{margin:0; flex:none; width:40px; height:22px; min-width:0; border-color:color-mix(in srgb,var(--ctl-ink) 35%,transparent)}
+.smchip{display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 5px 0 11px; border:1.5px solid color-mix(in srgb,var(--panel-2) 72%,var(--text)); border-radius:999px; background:color-mix(in srgb,var(--panel-2) 88%,var(--text)); cursor:pointer; -webkit-tap-highlight-color:transparent; box-sizing:border-box}
+.smchip .lbl,#staffCtl .smchip .lbl{font-size:10px; letter-spacing:0; white-space:nowrap; color:var(--text); margin:0}
+.smchip .tg,#staffCtl .stgrid .smchip .tg{margin:0; flex:none; width:40px; height:22px; min-width:0; border-color:color-mix(in srgb,var(--text) 25%,transparent)}
 #staffCtl .stgrid button.on:not(.tg){background:var(--blue); border-color:var(--blue); color:var(--on-blue)}
 #staffCtl .stgrid button svg{width:16px; height:24px}
 .slide{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .26s ease, opacity .2s ease, margin .26s ease; margin-top:0}
@@ -981,7 +981,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
 
 <nav class="lrail" id="lrail" aria-label="Edit tools">
   <button type="button" class="lr lrplay" data-lr="play" aria-label="Play"></button>
-  <button type="button" class="lr" data-lr="hear" aria-label="Listen to: Parts or Backing">Parts</button>
+  <button type="button" class="lr" data-lr="hear" aria-label="Listen to: Song or Parts">Parts</button>
   <button type="button" class="lr" data-lr="rew" aria-label="Back to the start"></button>
   <button type="button" class="lr" data-lr="met" aria-label="Metronome" aria-pressed="false"></button>
   <span class="lrsep"></span>
@@ -994,7 +994,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
   <button type="button" class="lr" data-lr="more" aria-label="More" aria-expanded="false">⋯</button>
 </nav>
 <div class="lrmenu" id="lrMenu" hidden>
-  <button type="button" data-lm="arrange">Arrange</button>
+  <button type="button" data-lm="arrange">Song</button>
   <button type="button" data-lm="view">Staff view</button>
   <label>Instrument <select id="lrInst" aria-label="Instrument for this part"></select></label>
   <button type="button" data-lm="setup">Setup</button>
@@ -1004,7 +1004,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
 
   <div class="bar" role="group" aria-label="Transport">
     <button class="play" id="playBtn" type="button" aria-label="Play"></button>
-    <button class="hear" id="hearBtn" type="button" aria-label="Listen to: Parts or Backing" title="Switch between the six parts and the generated backing"><span>Parts</span><span>Backing</span></button>
+    <button class="hear" id="hearBtn" type="button" aria-label="Listen to: Song or Parts" title="Song: Melody with the song's backing · Parts: the six parts"><span>Song</span><span>Parts</span></button>
     <button class="rew" id="rewBtn" type="button" aria-label="Back to the start"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M6 5v14M19 5v14L9 12z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="bpm">
       <button type="button" id="bpmDown" aria-label="Slower">−</button>
@@ -1027,8 +1027,8 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
   </div>
 
   <div class="tabs" role="tablist">
-    <button type="button" role="tab" id="tabChord" aria-selected="true" aria-controls="panelChord">Arrange</button>
-    <button type="button" role="tab" id="tabMelody" aria-selected="false" aria-controls="panelMelody">Edit</button>
+    <button type="button" role="tab" id="tabChord" aria-selected="true" aria-controls="panelChord">Song</button>
+    <button type="button" role="tab" id="tabMelody" aria-selected="false" aria-controls="panelMelody">Parts</button>
   </div>
 
   <section id="panelChord" role="tabpanel" aria-labelledby="tabChord" style="display:flex; flex-direction:column; gap:16px">
@@ -1116,8 +1116,8 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
     </div>
     <div class="panel ens" id="ensPanel">
-      <div class="ensr"><span class="lbl">Parts</span></div>
-      <p class="hint" id="bakeHint">Chord 1–5 follow this arrangement: bass → Chord 1, keys or guitar → Chord 2–3, strings → Chord 4–5 (only one of them: Chord 2–5). Any change here updates them, and replaces edits made to them in Edit. The Melody part is never touched.</p>
+      <div class="ensr"><span class="lbl">Auto-Convert</span></div>
+      <p class="hint" id="bakeHint">Bass → Chord 1, keys or guitar → Chord 2–3, strings → Chord 4–5 (only one of them: Chord 2–5).</p>
     </div>
   </section>
 
@@ -1284,7 +1284,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.2 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.3 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -7768,8 +7768,8 @@ function importMml(txt){
 }
 (function(){const is=$('#instSel');Core.INSTS.forEach(function(k){const o=document.createElement('option');o.value=k;o.textContent=INST_NAME[k];is.appendChild(o);});
   is.addEventListener('change',function(){P.pinst[Core.curTrack()]=is.value;Aud.setInsts(P.pinst);persist();try{Aud.audition('t'+(Core.curTrack()+1));}catch(e){}});})();
-function hearUI(){const v=P.guide?'backing':'parts';['#hearBtn'].forEach(function(q){const b=$(q);if(b){b.dataset.h=v;b.setAttribute('aria-pressed',P.guide?'true':'false');}});const r=document.querySelector('#lrail [data-lr="hear"]');if(r){r.dataset.h=v;r.textContent=P.guide?'Backing':'Parts';}}
-$('#hearBtn').addEventListener('click',function(){P.guide=!P.guide;persist();hearUI();toast(P.guide?'Listening to the backing (Melody + generated backing).':'Listening to the six parts.');});
+function hearUI(){const v=P.guide?'song':'parts';['#hearBtn'].forEach(function(q){const b=$(q);if(b){b.dataset.h=v;b.setAttribute('aria-pressed',P.guide?'true':'false');}});const r=document.querySelector('#lrail [data-lr="hear"]');if(r){r.dataset.h=v;r.textContent=P.guide?'Song':'Parts';}}
+$('#hearBtn').addEventListener('click',function(){P.guide=!P.guide;persist();hearUI();toast(P.guide?'Song: Melody with the song\'s backing.':'Parts: the six parts.');});
 function renderEns(){Aud.setInsts(P.pinst);hearUI();renderTrkRow();mmlStatus();}
 $('#btnMml').addEventListener('click',function(){setSheet('mml');});
 
