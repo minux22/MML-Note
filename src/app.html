@@ -167,7 +167,12 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 .nt.cur{background:var(--tc)}
 .nt.gh{background:var(--tc); opacity:.45; box-shadow:none; pointer-events:none}
 .nt.cl{box-shadow:0 0 0 2px #ff3b30, inset 0 0 0 1px rgba(0,0,0,.25)}
-.instrow{display:flex; align-items:center; gap:10px; margin:0 2px}
+.instrow{display:flex; align-items:center; gap:8px; margin:0 2px}
+.instrow #instSel{min-width:70px; width:0; flex:1 1 0; max-width:180px}
+.ichip{flex:none; display:inline-flex; align-items:center; gap:5px; height:32px; padding:0 10px; border:1.5px solid color-mix(in srgb,var(--panel-2) 72%,var(--text)); border-radius:999px; background:var(--panel-2); color:var(--dim); font-size:12px; font-weight:700; white-space:nowrap}
+.ichip.icon{width:36px; padding:0; justify-content:center}
+.ichip.icon svg{width:18px; height:18px}
+.ichip[aria-pressed="true"]{background:var(--mel); border-color:var(--mel); color:var(--mel-ink)}
 #instSel{width:auto; min-width:0; flex:none; padding-right:28px}
 .panel.ens{padding:10px 12px; gap:8px}
 .ens .ensr{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0}
@@ -1131,7 +1136,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
   <section id="panelMelody" role="tabpanel" aria-labelledby="tabMelody" hidden>
     <div class="panel">
       <div class="trkrow" id="trkRow" role="group" aria-label="Parts"></div>
-      <div class="instrow"><span class="lbl">Instrument</span><select id="instSel" aria-label="Instrument for this part"></select></div>
+      <div class="instrow"><span class="lbl">Instrument</span><select id="instSel" aria-label="Instrument for this part"></select><button type="button" class="ichip" id="instAll" aria-pressed="false" title="Use this instrument for all six parts" aria-label="All parts">All</button><button type="button" class="ichip icon" id="instRnd" title="Shuffle: a random instrument for each part, like strangers joining an ensemble" aria-label="Shuffle instruments"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></button></div>
       <div class="ctl" id="melOpts">
         <div class="mrow">
           <div class="mcol" style="flex:none"><span class="lbl">Mode</span><div class="seg mode3" id="viewSeg" role="group" aria-label="Mode"></div></div>
@@ -1291,7 +1296,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.1 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.2 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -7278,7 +7283,18 @@ function importMml(txt){
   toast('Imported '+Math.min(6,parts.length)+' track'+(parts.length>1?'s':'')+(parts.length>6?' (first 6 of '+parts.length+')':'')+(t&&(t.value<40||t.value>200)?' · tempo '+t.value+' set to '+P.bpm:'')+(errs?' · '+errs+' syntax problem'+(errs>1?'s':'')+' skipped':'')+'.');
 }
 (function(){const is=$('#instSel');Core.INSTS.forEach(function(k){const o=document.createElement('option');o.value=k;o.textContent=INST_NAME[k];is.appendChild(o);});
-  is.addEventListener('change',function(){P.pinst[Core.curTrack()]=is.value;Aud.setInsts(P.pinst);persist();try{Aud.audition('t'+(Core.curTrack()+1));}catch(e){}});})();
+  /* All parts: one instrument for all six; Shuffle: a random instrument per part (an ensemble of strangers) */
+  const allB=$('#instAll'), rndB=$('#instRnd');
+  const allUI=function(){allB.setAttribute('aria-pressed',U.instAll?'true':'false');};
+  allB.addEventListener('click',function(){U.instAll=!U.instAll;saveU();allUI();
+    if(U.instAll){const v=P.pinst[Core.curTrack()];for(let i=0;i<6;i++)P.pinst[i]=v;Aud.setInsts(P.pinst);persist();renderTrkRow();toast('All six parts: '+INST_NAME[v]+'.');}});
+  rndB.addEventListener('click',function(){
+    const L=Core.INSTS;for(let i=0;i<6;i++)P.pinst[i]=L[Math.floor(Math.random()*L.length)];
+    if(U.instAll){U.instAll=false;saveU();allUI();}
+    Aud.setInsts(P.pinst);persist();is.value=P.pinst[Core.curTrack()];renderTrkRow();
+    toast(P.pinst.map(function(v,i){return (i?'C'+i:'Mel')+' '+INST_NAME[v];}).join(' · '));});
+  allUI();
+  is.addEventListener('change',function(){if(U.instAll){for(let i=0;i<6;i++)P.pinst[i]=is.value;}else P.pinst[Core.curTrack()]=is.value;Aud.setInsts(P.pinst);persist();try{Aud.audition('t'+(Core.curTrack()+1));}catch(e){}});})();
 function hearUI(){const v=P.guide?'song':'parts';['#hearBtn'].forEach(function(q){const b=$(q);if(b){b.dataset.h=v;b.setAttribute('aria-pressed',P.guide?'true':'false');}});const r=document.querySelector('#lrail [data-lr="hear"]');if(r){r.dataset.h=v;r.textContent=P.guide?'Song':'Parts';}}
 $('#hearBtn').addEventListener('click',function(){P.guide=!P.guide;persist();hearUI();toast(P.guide?'Song: Melody with the song\'s backing.':'Parts: the six parts.');});
 function renderEns(){Aud.setInsts(P.pinst);hearUI();renderTrkRow();mmlStatus();}
