@@ -266,8 +266,6 @@ select{font:inherit; font-size:13px; height:32px; border:1px solid var(--line); 
 #staffCtl .opts+.slide.open+.opts{margin-top:0}
 .slide.open{margin-top:0}
 #staffCtl .seg.big button{height:36px}
-#stEdit .ns button{height:34px}
-#stEdit .delb{height:36px}
 #panelMelody .qbox{margin-top:6px}
 .pill{height:26px; padding:0 10px; border-radius:999px; border:1px solid var(--line); background:var(--panel-2); font-size:12px; color:var(--dim)}
 .pill[aria-pressed="true"]{background:var(--blue); border-color:var(--blue); color:var(--on-blue); font-weight:700}
@@ -688,12 +686,14 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
 .roll:not([data-tool="pan"]) .nt::after{content:""; position:absolute; right:0; top:0; bottom:0; width:5px; border-radius:0 6px 6px 0; background:rgba(0,0,0,.2)}
 .nt.hot{outline:2px solid var(--text); outline-offset:1px}
 .nt.sl{outline:2px solid var(--text); outline-offset:1px; filter:brightness(1.15)}
-#rollCtl .tgrp.mcol{align-items:flex-start}
-#stEdit.dim button{opacity:.35; pointer-events:none}
+#rollCtl .tgrp.mcol{align-items:flex-start; flex:none}
 #stWrap{-webkit-user-select:none; user-select:none}
-.selpop{position:absolute; z-index:6; display:flex; flex-wrap:wrap; gap:0; padding:3px; border:1px solid var(--line); border-radius:10px; background:var(--panel); box-shadow:0 6px 18px rgba(0,0,0,.22); white-space:nowrap}
+.selpop{position:absolute; z-index:6; display:flex; flex-wrap:nowrap; gap:2px; padding:4px; border:1px solid var(--line); border-radius:14px; background:var(--panel); box-shadow:0 6px 18px rgba(0,0,0,.22); white-space:nowrap}
 .selpop[hidden]{display:none}
-.selpop button{height:30px; min-width:28px; padding:0 5px; border:0; border-radius:7px; background:transparent; color:var(--text); font-size:12px; font-weight:700}
+.selpop button{height:42px; min-width:58px; padding:0 12px; border:0; border-radius:10px; background:transparent; color:var(--text); font-size:15px; font-weight:700}
+.selpop button + button{border-left:1px solid var(--line); border-radius:0}
+.selpop button:first-child{border-radius:10px 0 0 10px}
+.selpop button:last-child{border-radius:0 10px 10px 0}
 .selpop button:active{background:var(--panel-2)}
 .selpop button:disabled{opacity:.35}
 .selpop .sp-del{color:#ff5d50}
@@ -734,28 +734,17 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
   #toolSeg2 button{height:32px}
   #recDev{flex:0 0 calc(50% - 12px)}  /* Calibrate lines up with the Pickup switch above */
 }
-#staffCtl .stgrid button{height:32px; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--text); font-size:18px; display:grid; place-items:center}
-#staffCtl .stgrid .sttool{display:flex; grid-column:span 3; margin:0}
-#staffCtl .stgrid .sttool button{flex:1; height:32px; border:0; border-radius:8px; font-size:13px; background:transparent; color:var(--text)}
-#staffCtl .stgrid .sttool button.on{background:var(--mel); color:var(--mel-ink)}
-#staffCtl .stgrid button.on{background:var(--blue); border-color:var(--blue); color:var(--on-blue)}
+#staffCtl .stgrid button:not(.tg){height:32px; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--text); font-size:18px; display:grid; place-items:center}
+#staffCtl .stgrid .sttool{display:flex; align-items:center; gap:10px; grid-column:span 3; padding-left:6px}
+#staffCtl .stgrid .sttool .lbl{margin:0}
+#staffCtl .stgrid .sttool .tg{margin:0; flex:none; width:40px; height:22px}
+#staffCtl .stgrid button.on:not(.tg){background:var(--blue); border-color:var(--blue); color:var(--on-blue)}
 #staffCtl .stgrid button svg{width:16px; height:24px}
 .slide{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .26s ease, opacity .2s ease, margin .26s ease; margin-top:0}
 .slide>div{overflow:hidden; min-height:0}
 .slide.open{grid-template-rows:1fr; opacity:1; margin-top:12px}
 #staffCtl .opts+.slide.open+.opts{margin-top:8px}
-#stEdit{flex-direction:row; align-items:center; flex-wrap:nowrap; gap:8px; position:relative; margin:8px 0 0; padding:7px; border:1.5px solid var(--nudge); border-radius:14px; background:color-mix(in srgb,var(--nudge) 13%,var(--panel))}
-#stEdit::before{content:''; position:absolute; top:-8px; left:58px; width:14px; height:8px; background:var(--nudge); clip-path:polygon(50% 0,0 100%,100% 100%)}
-#stEdit .ns{border-color:color-mix(in srgb,var(--nudge) 55%,var(--line)); background:color-mix(in srgb,var(--nudge) 8%,var(--panel-2))}
-#stEdit .delb{border-color:color-mix(in srgb,var(--nudge) 55%,var(--line))}
-#stEdit .ns{flex:1; display:flex}
-#stEdit .ns button{flex:1; height:32px; padding:0; font-size:17px; color:var(--text); background:transparent; border:0; position:relative}
-#stEdit .ns button + button{border-left:1px solid var(--line)}
-#stEdit .delb{flex:none; width:54px; height:32px; border-radius:999px; border:1px solid var(--line); background:var(--panel-2); color:var(--text); font-size:14px}
-#stEdit button:disabled{opacity:.35}
-#stEdit button.nl{animation:nlit 1.1s ease-out}
 @keyframes nlit{0%{background:var(--nudge); color:var(--nudge-ink)}}
-@media (prefers-reduced-motion: reduce){#stEdit button.nl{animation:none}}
 .qbox{display:flex; flex-direction:column; gap:0; border-top:2px solid var(--mel); padding-top:6px}
 .qhead{display:flex; align-items:center; justify-content:space-between; width:100%; height:34px; padding:0 2px; border:0; background:transparent; color:var(--mel)}
 .qhead svg{transition:transform .25s ease}
@@ -1113,7 +1102,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
         </div>
         <div id="rollCtl" class="ctl">
           <div class="opts flush">
-            <div class="grp tgrp mcol"><span class="lbl">Tool</span><div class="seg mode3" id="toolSeg" role="group" aria-label="Tool"></div></div>
+            <div class="grp tgrp mcol"><span class="lbl">Smart</span><button type="button" class="tg" id="toolSeg" role="switch" aria-checked="true" aria-label="Smart tool (off: view only)"></button></div>
             <label class="field"><span class="lbl">Len</span><select id="lenSel" aria-label="Length"></select></label>
             <label class="field"><span class="lbl">Snap</span><select id="snapSel" aria-label="Snap"></select></label>
           </div>
@@ -1125,15 +1114,8 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
         </div>
         <div id="staffCtl" class="ctl" hidden>
           <div class="stbox">
-            <div class="stgrid"><div class="seg" id="nvSeg"></div><div class="seg" id="dotSeg"></div><div class="seg mode3 sttool" id="toolSeg2" role="group" aria-label="Tool"></div><div class="seg" id="accSeg"></div></div>
+            <div class="stgrid"><div class="seg" id="nvSeg"></div><div class="seg" id="dotSeg"></div><div class="sttool"><span class="lbl">Smart</span><button type="button" class="tg" id="toolSeg2" role="switch" aria-checked="true" aria-label="Smart tool (off: view only)"></button></div><div class="seg" id="accSeg"></div></div>
           </div>
-          <div class="slide" id="stSlide" inert><div>
-                <div class="opts flush" id="stEdit">
-                  <div class="seg ns"><button type="button" data-ed="semi+" aria-label="Raise a semitone">▲</button><button type="button" data-ed="semi-" aria-label="Lower a semitone">▼</button></div>
-                  <div class="seg ns"><button type="button" data-ed="left" aria-label="Move earlier by a 16th">◀</button><button type="button" data-ed="right" aria-label="Move later by a 16th">▶</button></div>
-                  <button class="delb" type="button" data-ed="del" aria-label="Delete selected note">Del</button>
-                </div>
-              </div></div>
         </div>
         <div id="recCtl" class="ctl" hidden>
           <div class="rrow"><select id="recDev" aria-label="Input"></select><button type="button" class="pill" id="recCal">Calibrate</button><span class="rlat" id="recLat"></span></div>
@@ -1152,7 +1134,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <div class="zwrap">
       <div class="roll" id="roll" data-tool="smart" aria-label="Piano roll">
-        <div class="selpop" id="selPop" hidden><button type="button" data-sa="copy">Copy</button><button type="button" class="sp-paste" data-sa="paste">Paste</button><button type="button" data-sa="dup">Dup</button><button type="button" data-sa="up" aria-label="Up a semitone">▲</button><button type="button" data-sa="down" aria-label="Down a semitone">▼</button><button type="button" data-sa="oup">Oct+</button><button type="button" data-sa="odn">Oct−</button><button type="button" class="sp-del" data-sa="del">Del</button></div>
+        <div class="selpop" id="selPop" hidden><button type="button" data-sa="copy">Copy</button><button type="button" class="sp-paste" data-sa="paste">Paste</button><button type="button" data-sa="dup">Dup</button><button type="button" class="sp-del" data-sa="del">Del</button></div>
         <div class="rlane"><div class="rcorner"><span>BAR</span><span>CHORD</span></div><div class="rlp" id="rLaneP"></div></div>
         <div class="rbody"><div class="rkeys" id="rKeys"></div><div class="rplane" id="rPlane"></div></div>
       </div>
@@ -1260,7 +1242,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.1 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.2 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -4520,10 +4502,7 @@ function renderMelOpts(){
   $('#selBar').hidden=true;
   roll.dataset.tool=U.rtool;$('#stWrap').dataset.tool=U.rtool;
   /* one tool for Roll and Staff: Smart edits, View only scrolls */
-  const setTool=function(v){if(v===U.rtool)return;U.rtool=v;saveU();smHidePop();renderMelOpts();};
-  const TOOLS=[['smart','Smart'],['pan','View']];
-  mkSeg($('#toolSeg'),TOOLS,function(){return U.rtool;},setTool);
-  mkSeg($('#toolSeg2'),TOOLS,function(){return U.rtool;},setTool);
+  ['#toolSeg','#toolSeg2'].forEach(function(q){$(q).setAttribute('aria-checked',U.rtool==='smart'?'true':'false');});
   mkSeg($('#viewSeg'),[['roll','Roll'],['staff','Staff']],function(){return U.view;},function(v){if(v===U.view)return;if(REC.run)stopPlay();U.view=v;saveU();renderMelody();recView();});
   const isRec=U.view==='rec';
   $('#rollCtl').hidden=U.view!=='roll';$('#staffCtl').hidden=U.view!=='staff';$('#recCtl').hidden=!isRec;
@@ -4533,8 +4512,6 @@ function renderMelOpts(){
   mkSeg($('#dotSeg'),[[true,'Dotted','<b style="font-size:16px;line-height:1">•</b>']],function(){return U.dot;},function(){if(U.nv>1){U.dot=!U.dot;saveU();}renderMelOpts();});
   mkSeg($('#accSeg'),[[1,'Sharp','♯'],[-1,'Flat','♭'],[2,'Natural','♮']],function(){return U.acc;},function(v){U.acc=U.acc===v?0:v;saveU();renderMelOpts();});
   const hasSel=!!selNote();
-  Array.prototype.forEach.call(document.querySelectorAll('#stEdit button'),function(b){b.disabled=!hasSel;});
-  const sl=$('#stSlide'),op=U.view==='staff'&&U.rtool==='smart';$('#stEdit').classList.toggle('dim',!hasSel);sl.classList.toggle('open',op);if(op)sl.removeAttribute('inert');else sl.setAttribute('inert','');
   $('#zOut').disabled=U.zoom<=ZMIN;$('#zIn').disabled=U.zoom>=ZMAX;
   const ls=$('#lenSel');
   const TRI=[[120,'16'],[240,'8'],[480,'4'],[80,'16T'],[160,'8T'],[320,'4T']];
@@ -4890,6 +4867,7 @@ $('#rKeys').addEventListener('pointerdown',function(e){
   const idx=Array.prototype.indexOf.call(k.parentNode.children,k);
   Aud.tone(HIGH-idx,90,0.5);
 });
+['#toolSeg','#toolSeg2'].forEach(function(q){$(q).addEventListener('click',function(){U.rtool=U.rtool==='smart'?'pan':'smart';saveU();smHidePop();renderMelOpts();});});
 $('#togPick').addEventListener('click',function(){if(playing)stopPlay();const home=K.cur<=loTick();edit(function(){P.pick=!P.pick;});if(home){K.cur=loTick();showCursor();}});
 $('#melAmt').addEventListener('input',function(e){beginLive();P.melAmt=+e.target.value;$('#melAmtLbl').textContent='Auto-Velocity '+P.melAmt+'%';});
 $('#melAmt').addEventListener('change',commitLive);
@@ -5504,36 +5482,6 @@ function endStaff(e){
 }
 stMain.addEventListener('pointerup',endStaff);
 stMain.addEventListener('pointercancel',function(e){if(e&&STS.ptrs.has(e.pointerId))STS.ptrs.delete(e.pointerId);if(STS.two){if(!STS.ptrs.size)STS.two=null;return;}stCancel();});
-$('#stEdit').addEventListener('click',function(e){
-  const b=e.target.closest?e.target.closest('[data-ed]'):null;if(!b||b.disabled)return;
-  b.classList.remove('nl');void b.offsetWidth;b.classList.add('nl');
-  const n=selNote();if(!n)return;
-  const a=b.dataset.ed, s=serialize();
-  /* several notes selected (box): the buttons move or delete all of them */
-  const many=selNotes().length>1?selNotes():null;
-  if(many){
-    if(a==='del'){const k=new Set(many);P.mel=P.mel.filter(function(x){return !k.has(x);});selKey=null;selKeys=new Set();}
-    else{
-      const ds=a==='right'?120:a==='left'?-120:0, dpp=a==='semi+'?1:a==='semi-'?-1:0, lo=P.pick?-barTk():0;
-      if(many.some(function(x){return x.s+ds<lo||x.s+ds+x.l>128*barTk()||x.p+dpp<0||x.p+dpp>127;}))return;
-      many.forEach(function(x){x.s+=ds;x.p+=dpp;});
-      P.mel=Core.tidy(P.mel);selKeys=new Set(many.map(function(x){return x.s+'|'+x.p;}));selKey={s:many[0].s,p:many[0].p};
-      Aud.tone(many[0].p,95,0.4);
-    }
-    P.sample=false;pushUndo(s);renderMelOpts();renderStaff();return;
-  }
-  if(a==='del'){P.mel.splice(P.mel.indexOf(n),1);selKey=null;selKeys=new Set();}
-  else{
-    if(a==='left'||a==='right'){
-      const ds=a==='right'?120:-120, ns=n.s+ds, lo=P.pick?-barTk():0;
-      if(ns<lo||ns+n.l>128*barTk())return;
-      n.s=ns;
-    }else n.p=Math.max(0,Math.min(127,n.p+(a==='semi+'?1:-1)));
-    P.mel=Core.tidy(P.mel);selKey={s:n.s,p:n.p};selKeys=new Set([n.s+'|'+n.p]);
-    Aud.tone(n.p,95,0.4);
-  }
-  P.sample=false;pushUndo(s);renderMelOpts();renderStaff();
-});
 
 /* ---------- live keyboard: two-row keys, recording, step input, latency ---------- */
 const WSEMI=[0,2,4,5,7,9,11], WNAME=['C','D','E','F','G','A','B'];
