@@ -1242,7 +1242,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.2 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.3 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -4852,6 +4852,8 @@ function smHidePop(){const p=$('#selPop');if(p)p.hidden=true;}
 function smPlacePop(){
   const p=$('#selPop');if(!p||p.hidden)return;const S=selNotes();if(!S.length){p.hidden=true;return;}
   const pv=$('#selPop .sp-paste');if(pv)pv.disabled=!clip;
+  if(U.view==='staff'){stPlacePop(p);return;}
+  if(p.parentNode!==roll)roll.insertBefore(p,roll.firstChild);
   const s0=Math.min.apply(null,S.map(function(n){return n.s;})), hiP=Math.max.apply(null,S.map(function(n){return n.p;})), loP=Math.min.apply(null,S.map(function(n){return n.p;}));
   p.style.maxWidth=Math.max(160,roll.clientWidth-KEYS_W-8)+'px';
   const ox=plane.offsetLeft, oy=plane.offsetTop, w=p.offsetWidth, h=p.offsetHeight;
@@ -4860,6 +4862,21 @@ function smPlacePop(){
   x=Math.max(roll.scrollLeft+KEYS_W+4,Math.min(roll.scrollLeft+roll.clientWidth-w-4,x));
   p.style.left=x+'px';p.style.top=y+'px';
 }
+/* staff: the same pop-up, held by the wrapper around the staff so it is not clipped, placed above the selected heads */
+function stPlacePop(p){
+  const sw=$('#stWrap'), zw=sw.parentNode;if(p.parentNode!==zw)zw.appendChild(p);
+  const pts=stNotes.filter(function(sn){return selKeys.has(sn.n.s+'|'+sn.n.p);});
+  if(!pts.length||sw.hidden){p.hidden=true;return;}
+  p.style.maxWidth=Math.max(160,sw.clientWidth-8)+'px';
+  const w=p.offsetWidth, h=p.offsetHeight;
+  const x0=Math.min.apply(null,pts.map(function(q){return q.x;})), y0=Math.min.apply(null,pts.map(function(q){return q.y;})), y1=Math.max.apply(null,pts.map(function(q){return q.y;}));
+  const bx=sw.offsetLeft+stMain.offsetLeft-sw.scrollLeft, by=sw.offsetTop+stMain.offsetTop;
+  let x=bx+x0-16, y=by+y0-h-16;
+  if(y<sw.offsetTop-h/2)y=by+y1+16;
+  x=Math.max(sw.offsetLeft+4,Math.min(sw.offsetLeft+sw.clientWidth-w-4,x));
+  p.style.left=x+'px';p.style.top=y+'px';
+}
+$('#stWrap').addEventListener('scroll',function(){if(U.view==='staff')smPlacePop();},{passive:true});
 $('#selPop').addEventListener('pointerdown',function(e){e.stopPropagation();});
 $('#selPop').addEventListener('click',function(e){const b=e.target.closest('[data-sa]');if(!b||b.disabled)return;selAction(b.dataset.sa);if(b.dataset.sa==='del'||!selKeys.size)smHidePop();else smPlacePop();});
 $('#rKeys').addEventListener('pointerdown',function(e){
@@ -5127,7 +5144,8 @@ function stModel(){
   return {ou:ou,pcs:pcs};
 }
 
-function renderStaff(){
+function renderStaff(){stRender();if(U.view==='staff')smPlacePop();}
+function stRender(){
   const ux=stUx(), bw=stBw(), mb=mBars(), nb=mb+(P.pick?1:0), W=nb*bw+6, sf=Core.keySig(P.key,P.scale);
   const TM=stMt(), UB=TM.ub, UBE=TM.ube;
   const mdl=stModel(), sig=sigAccs(), STEP=ST.step;
@@ -5384,7 +5402,7 @@ stMain.addEventListener('pointerdown',function(e){
   STS.ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   try{stMain.setPointerCapture(e.pointerId);}catch(x){}
   e.preventDefault();
-  if(STS.ptrs.size>=2){stCancel();const c=stTwo();STS.two={x:c.x,y:c.y,d:c.d,z:U.zoom};return;}
+  if(STS.ptrs.size>=2){stCancel();smHidePop();const c=stTwo();STS.two={x:c.x,y:c.y,d:c.d,z:U.zoom};return;}
   const q=stLocal(e), hit=stHit(q.x,q.y);
   Aud.ensure();
   if(hit){
@@ -5447,7 +5465,7 @@ function endStaff(e){
     const x0=Math.min(d.x0,d.x1), x1=Math.max(d.x0,d.x1), y0=Math.min(d.y0,d.y1), y1=Math.max(d.y0,d.y1);
     const hits=[];stNotes.forEach(function(sn){if(sn.x>=x0-6&&sn.x<=x1+6&&sn.y>=y0-6&&sn.y<=y1+6&&hits.indexOf(sn.n)<0)hits.push(sn.n);});
     selKeys=new Set(hits.map(function(n){return n.s+'|'+n.p;}));selKey=hits.length?{s:hits[0].s,p:hits[0].p}:null;
-    renderMelOpts();renderStaff();return;
+    renderMelOpts();renderStaff();if(hits.length>1)smShowPop();else smHidePop();return;
   }
   if(d.mode==='pending'){
     /* a tap on a note: select it; a second tap soon after deletes it (or the selection it belongs to) */
@@ -5455,14 +5473,14 @@ function endStaff(e){
     if(STS.last&&STS.last.k===k&&now-STS.last.t<SM_DBL){
       const del=selKeys.has(k)&&selKeys.size>1?new Set(selKeys):new Set([k]);
       P.mel=P.mel.filter(function(n){return !del.has(n.s+'|'+n.p);});selKey=null;selKeys=new Set();STS.last=null;
-      P.sample=false;pushUndo(d.snap);renderMelOpts();renderStaff();return;
+      P.sample=false;pushUndo(d.snap);smHidePop();renderMelOpts();renderStaff();return;
     }
     STS.last={k:k,t:now};
-    if(!(selKeys.has(k)&&selKeys.size>1)){selKey={s:d.hit.s,p:d.hit.p};selKeys=new Set([k]);}
+    if(!(selKeys.has(k)&&selKeys.size>1)){selKey={s:d.hit.s,p:d.hit.p};selKeys=new Set([k]);smHidePop();}
     renderMelOpts();renderStaff();return;
   }
   if(d.mode==='add'){
-    if(!d.moved&&selKeys.size){selKey=null;selKeys=new Set();stG=null;renderMelOpts();renderStaff();return;}
+    if(!d.moved&&selKeys.size){selKey=null;selKeys=new Set();stG=null;smHidePop();renderMelOpts();renderStaff();return;}
     if(stG){
       const s=d.abs*120, tot=totalTicks();
       if(s>=-pkT()&&s<tot){
@@ -5478,7 +5496,7 @@ function endStaff(e){
   else P.mel=Core.tidy(P.mel);
   selKeys=new Set(d.notes.map(function(n){return n.s+'|'+n.p;}));selKey={s:d.lead.s,p:d.lead.p};
   P.sample=false;if(d.snap!==serialize())pushUndo(d.snap);
-  stG=null;renderMelOpts();renderStaff();
+  stG=null;renderMelOpts();renderStaff();if(selKeys.size>1)smShowPop();else smHidePop();
 }
 stMain.addEventListener('pointerup',endStaff);
 stMain.addEventListener('pointercancel',function(e){if(e&&STS.ptrs.has(e.pointerId))STS.ptrs.delete(e.pointerId);if(STS.two){if(!STS.ptrs.size)STS.two=null;return;}stCancel();});
