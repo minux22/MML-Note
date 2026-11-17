@@ -695,7 +695,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
 .roll:not([data-tool="pan"]) .nt::after{content:""; position:absolute; right:0; top:0; bottom:0; width:5px; border-radius:0 6px 6px 0; background:rgba(0,0,0,.2)}
 .nt.hot{outline:2px solid var(--text); outline-offset:1px}
 .nt.sl{outline:2px solid var(--text); outline-offset:1px; filter:brightness(1.15)}
-#rollCtl .tgrp.mcol{align-items:flex-start; flex:none}
+#rollCtl .tgrp{flex:none; display:flex; align-items:center}
 #stWrap{-webkit-user-select:none; user-select:none}
 .selpop{position:absolute; z-index:6; display:flex; flex-wrap:nowrap; gap:2px; padding:4px; border:1px solid var(--line); border-radius:14px; background:var(--panel); box-shadow:0 6px 18px rgba(0,0,0,.22); white-space:nowrap}
 .selpop[hidden]{display:none}
@@ -744,9 +744,11 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
   #recDev{flex:0 0 calc(50% - 12px)}  /* Calibrate lines up with the Pickup switch above */
 }
 #staffCtl .stgrid button:not(.tg){height:32px; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--text); font-size:18px; display:grid; place-items:center}
-#staffCtl .stgrid .sttool{display:flex; align-items:center; gap:10px; grid-column:span 3; padding-left:6px}
-#staffCtl .stgrid .sttool .lbl{margin:0}
-#staffCtl .stgrid .sttool .tg{margin:0; flex:none; width:40px; height:22px}
+#staffCtl .stgrid .sttool{grid-column:span 3; justify-self:start; align-self:center}
+/* Smart tool switch: a dark outlined chip so it stands out (Roll and Staff) */
+.smchip{display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 5px 0 11px; border:1.5px solid var(--ctl); border-radius:999px; background:var(--ctl); cursor:pointer; -webkit-tap-highlight-color:transparent; box-sizing:border-box}
+.smchip .lbl,#staffCtl .smchip .lbl{font-size:10px; letter-spacing:0; white-space:nowrap; color:var(--ctl-ink); margin:0}
+.smchip .tg,#staffCtl .stgrid .smchip .tg{margin:0; flex:none; width:40px; height:22px; min-width:0; border-color:color-mix(in srgb,var(--ctl-ink) 35%,transparent)}
 #staffCtl .stgrid button.on:not(.tg){background:var(--blue); border-color:var(--blue); color:var(--on-blue)}
 #staffCtl .stgrid button svg{width:16px; height:24px}
 .slide{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .26s ease, opacity .2s ease, margin .26s ease; margin-top:0}
@@ -1111,7 +1113,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
         </div>
         <div id="rollCtl" class="ctl">
           <div class="opts flush">
-            <div class="grp tgrp mcol"><span class="lbl">Smart</span><button type="button" class="tg" id="toolSeg" role="switch" aria-checked="true" aria-label="Smart tool (off: view only)"></button></div>
+            <div class="grp tgrp"><label class="smchip"><span class="lbl">Smart tool</span><button type="button" class="tg" id="toolSeg" role="switch" aria-checked="true" aria-label="Smart tool (off: view only)"></button></label></div>
             <label class="field"><span class="lbl">Len</span><select id="lenSel" aria-label="Length"></select></label>
             <label class="field"><span class="lbl">Snap</span><select id="snapSel" aria-label="Snap"></select></label>
           </div>
@@ -1123,7 +1125,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
         </div>
         <div id="staffCtl" class="ctl" hidden>
           <div class="stbox">
-            <div class="stgrid"><div class="seg" id="nvSeg"></div><div class="seg" id="dotSeg"></div><div class="sttool"><span class="lbl">Smart</span><button type="button" class="tg" id="toolSeg2" role="switch" aria-checked="true" aria-label="Smart tool (off: view only)"></button></div><div class="seg" id="accSeg"></div></div>
+            <div class="stgrid"><div class="seg" id="nvSeg"></div><div class="seg" id="dotSeg"></div><label class="sttool smchip"><span class="lbl">Smart tool</span><button type="button" class="tg" id="toolSeg2" role="switch" aria-checked="true" aria-label="Smart tool (off: view only)"></button></label><div class="seg" id="accSeg"></div></div>
           </div>
         </div>
         <div id="recCtl" class="ctl" hidden>
@@ -1251,7 +1253,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.3 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.4 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
