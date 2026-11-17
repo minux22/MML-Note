@@ -194,6 +194,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 .accbox{gap:10px}
 .accrow{display:flex; align-items:center; justify-content:space-between; gap:10px}
 .accrow .tg{margin:0}
+.accsub{font-size:inherit; font-weight:600; color:var(--dim); letter-spacing:inherit}
 .mmlbtns{display:flex; gap:8px; margin:8px 0}
 .mmlbtns .btn{flex:1 1 auto; margin:0; white-space:nowrap; padding:0 10px}
 .impwrap{position:relative}
@@ -1297,7 +1298,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.6 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.7.7 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -7744,8 +7745,8 @@ function renderMml(){
   items.forEach(function(x){h+='<div class="iss '+x.level+'"'+(x.track?' data-t="'+(x.track-1)+'"':'')+'>'+(x.track?'<b>'+TRK_NAME[x.track-1]+'</b>':'')+esc(x.message)+'</div>';});
   h+='<div class="sbox throw"><span class="lbl">Limit</span><div class="seg" id="mmlLim" role="group" aria-label="Characters per track"></div></div>';
   h+='<div class="sbox throw"><span class="lbl">Use n</span><button type="button" class="tg" id="mmlN" role="switch" aria-checked="'+(P.mml.useN?'true':'false')+'" aria-label="Use n notes"></button></div>';
-  h+='<div class="sbox accbox"><div class="accrow"><span class="lbl">Accent</span><button type="button" class="tg" id="mmlAcc" role="switch" aria-checked="'+(P.mml.accent?'true':'false')+'" aria-label="Accent with volume"></button></div>';
-  if(P.mml.accent)h+='<div class="accrow accv"><span class="lbl">Volume</span><span class="accs">'+['Strong','Medium','Weak'].map(function(nm,i){let o='';for(let v=15;v>=1;v--)o+='<option'+(v===P.mml.acc[i]?' selected':'')+'>'+v+'</option>';return '<label>'+nm+'<select data-acc="'+i+'">'+o+'</select></label>';}).join('')+'</span></div>';
+  h+='<div class="sbox accbox"><div class="accrow"><span class="lbl">Accent <small class="accsub">(Volume control)</small></span><button type="button" class="tg" id="mmlAcc" role="switch" aria-checked="'+(P.mml.accent?'true':'false')+'" aria-label="Accent with volume"></button></div>';
+  if(P.mml.accent)h+='<div class="accrow accv"><span></span><span class="accs">'+['Strong','Medium','Weak'].map(function(nm,i){let o='';for(let v=15;v>=1;v--)o+='<option'+(v===P.mml.acc[i]?' selected':'')+'>'+v+'</option>';return '<label>'+nm+'<select data-acc="'+i+'">'+o+'</select></label>';}).join('')+'</span></div>';
   h+='</div>';
   h+='<div class="mmlbtns"><button class="btn primary" type="button" id="mmlAll">Copy MML@ (all parts)</button><button class="btn" type="button" id="mmlSave">Save MML file (.txt)</button></div>';
   r.enc.parts.forEach(function(p,i){
