@@ -1275,6 +1275,11 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
         <div class="sfrow"><span class="lbl">Violin</span><select id="ipViolin" data-ik="violin" aria-label="Violin sound"></select></div>
         <div class="sfrow"><span class="lbl">Chalumeau</span><select id="ipChalumeau" data-ik="chalumeau" aria-label="Chalumeau sound"></select></div>
         <div class="sfrow"><span class="lbl">Xylophone</span><select id="ipXylophone" data-ik="xylophone" aria-label="Xylophone sound"></select></div>
+        <div class="sfrow"><span class="lbl">Piano</span><select id="ipPiano" data-ik="piano" aria-label="Piano sound"></select></div>
+        <div class="sfrow"><span class="lbl">Harp</span><select id="ipHarp" data-ik="harp" aria-label="Harp sound"></select></div>
+        <div class="sfrow"><span class="lbl">Music Box</span><select id="ipMusicbox" data-ik="musicbox" aria-label="Music Box sound"></select></div>
+        <div class="sfrow"><span class="lbl">Big Drum</span><select id="ipBigdrum" data-ik="bigdrum" aria-label="Big Drum sound"></select></div>
+        <div class="sfrow"><span class="lbl">Cymbals</span><select id="ipCymbals" data-ik="cymbals" aria-label="Cymbals sound"></select></div>
       </div>
       <div id="sfRows">
         <div class="sfrow tr"><span class="lbl">Melody</span><select class="fs" id="sfMf" aria-label="Melody SoundFont"></select><select id="sfM" aria-label="Melody sound"></select></div>
@@ -1305,7 +1310,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.3 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.4 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -2730,7 +2735,8 @@ const Core=(function(){
      (roll, staff, keyboard) work on whichever track is selected. */
   const NTRK=6;let CUR=0;
   /* Mabinogi Mobile instruments (the player chooses one in the game; here it only sets the preview sound) */
-  const INSTS=['lute','mandolin','flute','violin','chalumeau','xylophone'];
+  /* game instruments, in the order of the Fury Sound Pack (3MLE preset list) */
+  const INSTS=['lute','mandolin','flute','violin','chalumeau','xylophone','piano','harp','musicbox','bigdrum','cymbals'];
   function bindMel(p){
     if(!p||!p.tracks)return p;
     Object.defineProperty(p,'mel',{configurable:true,enumerable:false,get:function(){return this.tracks[CUR];},set:function(v){this.tracks[CUR]=v;}});
@@ -4090,6 +4096,7 @@ const Aud=(function(){
     lp.type='lowpass';g.connect(lp);lp.connect(out);out.connect(dst());
     const osc=function(type,mul,lvl,det){const o=ctx.createOscillator(), og=ctx.createGain();o.type=type;o.frequency.value=f*mul;if(det)o.detune.value=det;og.gain.value=lvl;o.connect(og);og.connect(g);oscs.push(o);return o;};
     let amp=0.16*v+0.01, stop=end+0.5;
+    if(kind==='piano'||kind==='harp')kind='lute';
     if(kind==='lute'||kind==='mandolin'){
       /* plucked strings (Karplus-Strong, one buffer per pitch, cached).
          Lute: a mellow archtop jazz guitar (soft thumb, dark, round). Mandolin: paired courses with an octave string, like
@@ -4101,11 +4108,24 @@ const Aud=(function(){
       g.gain.setValueAtTime(amp,t);g.gain.setTargetAtTime(0,end,man?0.07:0.09);
       stop=Math.min(end+0.5,t+src.buffer.duration);
       src.start(t);src.stop(stop);
-    }else if(kind==='xylophone'){
-      osc('sine',1,1);osc('sine',3.98,0.25);osc('sine',9.2,0.06);
-      lp.frequency.value=9000;amp*=1.3;
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(amp,t+0.002);g.gain.setTargetAtTime(0,t+0.002,0.22);
-      stop=t+1.6;
+    }else if(kind==='bigdrum'||kind==='cymbals'){
+      /* unpitched: the same hit on every note (as in the Fury Sound Pack) */
+      const nb=ctx.createBufferSource();nb.buffer=noiseBuf();
+      if(kind==='bigdrum'){
+        const o=ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(48,t+0.25);o.connect(g);oscs.push(o);
+        const nf=ctx.createBiquadFilter(), ng=ctx.createGain();nf.type='lowpass';nf.frequency.value=900;ng.gain.value=0.25;nb.connect(nf);nf.connect(ng);ng.connect(g);
+        lp.frequency.value=2500;amp*=2.2;g.gain.setValueAtTime(amp,t);g.gain.setTargetAtTime(0,t+0.01,0.28);stop=t+1.4;
+      }else{
+        const hf=ctx.createBiquadFilter();hf.type='highpass';hf.frequency.value=5000;nb.connect(hf);hf.connect(g);
+        lp.frequency.value=14000;amp*=0.9;g.gain.setValueAtTime(amp,t);g.gain.setTargetAtTime(0,t+0.005,0.55);stop=t+2.6;
+      }
+      nb.start(t);nb.stop(stop);
+    }else if(kind==='xylophone'||kind==='musicbox'){
+      if(kind==='musicbox'){osc('sine',1,1);osc('sine',4.2,0.18);osc('sine',2,0.12);}
+      else{osc('sine',1,1);osc('sine',3.98,0.25);osc('sine',9.2,0.06);}
+      lp.frequency.value=9000;amp*=1.3;const dk=kind==='musicbox'?0.6:0.22;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(amp,t+0.002);g.gain.setTargetAtTime(0,t+0.002,dk);
+      stop=t+(kind==='musicbox'?3:1.6);
     }else{
       let att=0.05, rel=0.08;
       if(kind==='flute'){osc('sine',1,1);osc('sine',2,0.16);osc('sine',3,0.05);lp.frequency.value=5000;att=0.07;amp*=0.9;
@@ -6811,20 +6831,23 @@ document.addEventListener('keydown',function(e){
     return i<0?none:{fid:F.id,pi:i};
   }
   /* game instrument -> SoundFont sound [bank, program (0-based)] in GeneralUser GS; null = basic synth */
-  const IK=['lute','mandolin','flute','violin','chalumeau','xylophone'];
-  const DEFI={lute:[0,26],mandolin:[8,25],flute:[0,73],violin:[0,40],chalumeau:[0,71],xylophone:[0,13]}, IVOL=55;
+  const IK=['lute','mandolin','flute','violin','chalumeau','xylophone','piano','harp','musicbox','bigdrum','cymbals'];
+  const DEFI={lute:[0,26],mandolin:[8,25],flute:[0,73],violin:[0,40],chalumeau:[0,71],xylophone:[0,13],piano:[0,0],harp:[0,46],musicbox:[0,10],bigdrum:[0,116],cymbals:null}, IVOL=55;
+  /* preset names that count as the instrument in other files (the Fury Sound Pack calls them BassDrum and Cymbal) */
+  const IALIAS={musicbox:['music box','musicbox'],bigdrum:['bassdrum','bass drum','big drum','bigdrum'],cymbals:['cymbal','cymbals']};
   if(!S.ip||typeof S.ip!=='object')S.ip={};
   function ipOf(kind){const v=S.ip[kind];return v===null?null:(Array.isArray(v)?v:DEFI[kind]);}
   function resolveI(kind){
     const none={fid:null,pi:-1}, t=ipOf(kind);
-    if(!files.length||isBasic()||!t)return none;
+    if(!files.length||isBasic()||S.ip[kind]===null)return none;
     /* not chosen by hand: a loaded file with a sound named after the game instrument wins (e.g. a Mabinogi pack) */
     if(!Array.isArray(S.ip[kind])){
-      const want=kind.toLowerCase();
+      const want=IALIAS[kind]||[kind];
       for(let j=0;j<files.length;j++){const F=files[j];if(isGu(F))continue;
-        const hit=F.m.list.filter(function(pr){return String(pr.name).trim().toLowerCase()===want;})[0];
+        const hit=F.m.list.filter(function(pr){return want.indexOf(String(pr.name).trim().toLowerCase())>=0;})[0];
         if(hit)return {fid:F.id,pi:hit.i};}
     }
+    if(!t)return none;
     const order=guFirst();
     for(let j=0;j<order.length;j++){const q=order[j].m.indexOf(t[0],t[1]);if(q>=0)return {fid:order[j].id,pi:q};}
     for(let j=0;j<order.length;j++){const q=order[j].m.indexOf(0,t[1]);if(q>=0)return {fid:order[j].id,pi:q};}
@@ -7670,7 +7693,7 @@ function isLandEdit(){return LAND_MQ.matches&&document.body.classList.contains('
 /* ---------- ensemble: six one-voice tracks, bake, MML export and checks ---------- */
 var PART_GAME=['Melody','Chord 1','Chord 2','Chord 3','Chord 4','Chord 5'], PART_ROLE=['','Bass','Alto','Tenor','Extra','Extra'];
 var TRK_NAME=PART_GAME.map(function(g,i){return PART_ROLE[i]?g+' · '+PART_ROLE[i]:g;});
-var INST_NAME={lute:'Lute',mandolin:'Mandolin',flute:'Flute',violin:'Violin',chalumeau:'Chalumeau',xylophone:'Xylophone'};
+var INST_NAME={lute:'Lute',mandolin:'Mandolin',flute:'Flute',violin:'Violin',chalumeau:'Chalumeau',xylophone:'Xylophone',piano:'Piano',harp:'Harp',musicbox:'Music Box',bigdrum:'Big Drum',cymbals:'Cymbals'};
 /* notes of the edited track that sound with the same pitch in another track (the game cuts the earlier one) */
 function ensClash(){
   const ct=Core.curTrack(), out=new Set();
