@@ -3785,7 +3785,7 @@ let growing=false;
 /* Chord 1–5 always follow the arrangement (chords, style, sections, key, meter...): whenever it changes they are
    converted again. Notes, mixer, instruments and the listening choice do not count. A project that is loaded, opened or
    restored by Undo keeps its parts as they are until the arrangement changes. */
-let bakeP=null, bakeSig='';
+let bakeP=null, bakeSig='', bakeKeep=false;  /* bakeKeep: the next change keeps the parts as they are (MML import) */
 const SIG_SKIP={tracks:1,mel:1,guide:1,mix:1,mml:1,name:1,id:1,sample:1,takes:1,recN:1,pinst:1,melAmt:1,slot:1,dp:1};
 function arrSig(){
   Core.storeCur(P);const x=Core.secOf(P,Core.curId(P)), sec={}, o={};
@@ -3795,6 +3795,7 @@ function arrSig(){
 }
 function autoBake(){
   const sg=arrSig(), empty=!P.tracks.slice(1).some(function(t){return t.length;});
+  if(bakeKeep){bakeKeep=false;bakeP=P;bakeSig=sg;return false;}
   if(bakeP!==P){bakeP=P;bakeSig=sg;if(!empty)return false;}
   else if(sg===bakeSig)return false;
   bakeSig=sg;
@@ -7769,6 +7770,7 @@ function importMml(txt){
   const parsed=parts.slice(0,6).map(MabiCore.parseTrack), errs=parsed.reduce(function(a,x){return a+x.errors.length;},0);
   const t=[].concat.apply([],parsed.map(function(x){return x.tempos;}))[0];
   if(playing)stopPlay();
+  bakeKeep=true;
   edit(function(){
     if(t)P.bpm=Math.max(40,Math.min(200,t.value));
     for(let i=0;i<6;i++)P.tracks[i]=(parsed[i]?parsed[i].notes:[]).map(function(n){return {s:n.tick*5,l:n.dur*5,p:n.midi};});
