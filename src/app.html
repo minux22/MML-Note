@@ -1296,7 +1296,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.2 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.3 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -6313,6 +6313,13 @@ document.addEventListener('keydown',function(e){
   function resolveI(kind){
     const none={fid:null,pi:-1}, t=ipOf(kind);
     if(!files.length||isBasic()||!t)return none;
+    /* not chosen by hand: a loaded file with a sound named after the game instrument wins (e.g. a Mabinogi pack) */
+    if(!Array.isArray(S.ip[kind])){
+      const want=kind.toLowerCase();
+      for(let j=0;j<files.length;j++){const F=files[j];if(isGu(F))continue;
+        const hit=F.m.list.filter(function(pr){return String(pr.name).trim().toLowerCase()===want;})[0];
+        if(hit)return {fid:F.id,pi:hit.i};}
+    }
     const order=guFirst();
     for(let j=0;j<order.length;j++){const q=order[j].m.indexOf(t[0],t[1]);if(q>=0)return {fid:order[j].id,pi:q};}
     for(let j=0;j<order.length;j++){const q=order[j].m.indexOf(0,t[1]);if(q>=0)return {fid:order[j].id,pi:q};}
