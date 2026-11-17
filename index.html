@@ -123,6 +123,10 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
     width:calc(48px + env(safe-area-inset-left,0px)); padding:4px 0 4px env(safe-area-inset-left,0px); overflow-y:auto; background:var(--bg-2); border-right:1px solid var(--line)}
   body.tab-edit .lr{width:38px; height:30px; flex:none; display:grid; place-items:center; padding:0; border:0; border-radius:8px; background:transparent; color:var(--text); font-size:20px; line-height:1}
   body.tab-edit .lr svg{width:20px; height:20px}
+  /* no dock in landscape: Continue and the zoom buttons sit on the bottom edge of the roll */
+  body.tab-edit .zoom,body.tab-edit .cont{bottom:env(safe-area-inset-bottom, 0px)}
+  body.tab-edit.kbd-open .zoom,body.tab-edit.kbd-open .cont{bottom:calc(var(--kbdh,150px) + env(safe-area-inset-bottom, 0px))}
+  body.tab-edit .zoom .zb,body.tab-edit .contb{bottom:8px}
   body.tab-edit .lr[data-lr="hear"]{font-size:9px; font-weight:800; letter-spacing:0}
   body.tab-edit .lr[data-lr="smart"]{font-size:10px; font-weight:800; letter-spacing:.02em}
   body.tab-edit .lr[data-lr="smart"][aria-pressed="true"]{background:var(--mel); color:var(--mel-ink)}
@@ -1296,7 +1300,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.0 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.1 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
