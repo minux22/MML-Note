@@ -1253,7 +1253,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.4 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.6.5 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -3962,6 +3962,44 @@ const Aud=(function(){
   let INST={t1:'lute',t2:'lute',t3:'lute',t4:'lute',t5:'lute',t6:'lute'};
   function setInsts(a){(a||[]).forEach(function(v,i){INST['t'+(i+1)]=v;});}
   function vib(o,t,rate,cents,delay){const l=ctx.createOscillator(), lg=ctx.createGain();l.frequency.value=rate;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(cents,t+delay+0.2);l.connect(lg);lg.connect(o.detune);l.start(t);return l;}
+  let NOISE=null;
+  function noiseBuf(){if(NOISE&&NOISE.sampleRate===ctx.sampleRate)return NOISE;const b=ctx.createBuffer(1,Math.floor(ctx.sampleRate*1),ctx.sampleRate),c=b.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1;return NOISE=b;}
+  const KS=new Map();
+  /* one plucked string into out[] from sample `at`: delay N, smoothing passes on the pluck (darker), pluck position, decay T60 */
+  function ksString(out,sr,f,at,o){
+    const N=Math.max(2,Math.floor(sr/f-0.5)), x=new Float32Array(N);
+    for(let i=0;i<N;i++)x[i]=Math.random()*2-1;
+    for(let p=0;p<o.smooth;p++){let prev=x[N-1];for(let i=0;i<N;i++){const c=x[i];x[i]=(c+prev)*0.5;prev=c;}}
+    const pp=Math.max(1,Math.round(N*o.pos));for(let i=N-1;i>=pp;i--)x[i]-=x[i-pp];
+    let mean=0;for(let i=0;i<N;i++)mean+=x[i];mean/=N;for(let i=0;i<N;i++)x[i]-=mean;
+    const fr=sr/(N+0.5), S=Math.min(0.99995,Math.pow(10,-3/(o.t60*fr))/Math.cos(Math.PI*fr/sr));
+    const L=out.length-at, y=new Float32Array(L);
+    for(let n=0;n<L;n++){y[n]=n<N?x[n]:S*0.5*(y[n-N]+(n-N-1>=0?y[n-N-1]:0));out[at+n]+=y[n]*o.lvl;}
+    return fr;
+  }
+  function ksBuf(kind,m){
+    const sr=ctx.sampleRate, key=kind+'|'+m+'|'+sr;
+    if(KS.has(key)){const b=KS.get(key);KS.delete(key);KS.set(key,b);return b;}
+    const f=hz(m), man=kind==='mandolin', dur=man?1.7:2.2, buf=ctx.createBuffer(1,Math.floor(sr*dur),sr), out=buf.getChannelData(0);
+    let fr;
+    if(man){
+      /* three strings a few cents apart, the second a hair late, the octave string on top: the 12-string shimmer */
+      const c=Math.pow(2,4/1200);
+      fr=ksString(out,sr,f*c,0,{smooth:0,pos:0.13,t60:1.3,lvl:1});
+      ksString(out,sr,f/c,Math.round(sr*0.007),{smooth:0,pos:0.17,t60:1.2,lvl:0.85});
+      if(m<84)ksString(out,sr,f*2,Math.round(sr*0.012),{smooth:0,pos:0.2,t60:0.8,lvl:0.4});
+      fr=fr/(f*c)*f;   /* rate below then nudges the whole course so the first string lands in tune */
+    }else{
+      fr=ksString(out,sr,f,0,{smooth:3,pos:0.22,t60:Math.max(0.9,2.4-(m-48)*0.03),lvl:1});
+      /* the soft thump of the thumb on the string */
+      for(let i=0;i<Math.min(out.length,sr*0.03);i++)out[i]+=Math.sin(2*Math.PI*f*i/sr)*0.35*Math.exp(-i/(sr*0.008));
+    }
+    let pk=0;for(let i=0;i<out.length;i++)pk=Math.max(pk,Math.abs(out[i]));if(pk>0)for(let i=0;i<out.length;i++)out[i]/=pk;
+    const fade=Math.floor(sr*0.05);for(let i=0;i<fade;i++)out[out.length-1-i]*=i/fade;
+    buf._rate=f/fr;
+    KS.set(key,buf);if(KS.size>96)KS.delete(KS.keys().next().value);
+    return buf;
+  }
   function instr(kind,m,vel,t,dur){
     const f=hz(m), v=Math.pow(vel/127,1.1), d=Math.max(0.05,dur), end=t+d;
     const out=ctx.createGain(), g=ctx.createGain(), lp=ctx.createBiquadFilter(), oscs=[];
@@ -3969,12 +4007,16 @@ const Aud=(function(){
     const osc=function(type,mul,lvl,det){const o=ctx.createOscillator(), og=ctx.createGain();o.type=type;o.frequency.value=f*mul;if(det)o.detune.value=det;og.gain.value=lvl;o.connect(og);og.connect(g);oscs.push(o);return o;};
     let amp=0.16*v+0.01, stop=end+0.5;
     if(kind==='lute'||kind==='mandolin'){
-      const man=kind==='mandolin';
-      osc('triangle',1,1);osc('sawtooth',1,man?0.55:0.3,man?7:0);if(man)osc('sawtooth',1,0.45,-7);
-      lp.frequency.setValueAtTime(man?5200:3200,t);lp.frequency.setTargetAtTime(man?1500:800,t,man?0.12:0.18);
-      const tau=man?0.45:0.8;
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(amp,t+0.003);g.gain.setTargetAtTime(0,t+0.003,tau);
-      g.gain.setTargetAtTime(0,end,0.06);stop=Math.min(end+0.4,t+tau*6);
+      /* plucked strings (Karplus-Strong, one buffer per pitch, cached).
+         Lute: a mellow archtop jazz guitar (soft thumb, dark, round). Mandolin: paired courses with an octave string, like
+         the jangle of a 12-string guitar. */
+      const man=kind==='mandolin', src=ctx.createBufferSource();
+      src.buffer=ksBuf(kind,m);src.playbackRate.value=src.buffer._rate;src.connect(g);
+      lp.frequency.value=man?(5200+2600*v):(1500+1300*v);lp.Q.value=man?0.4:0.3;
+      amp*=man?1.25:1.5;
+      g.gain.setValueAtTime(amp,t);g.gain.setTargetAtTime(0,end,man?0.07:0.09);
+      stop=Math.min(end+0.5,t+src.buffer.duration);
+      src.start(t);src.stop(stop);
     }else if(kind==='xylophone'){
       osc('sine',1,1);osc('sine',3.98,0.25);osc('sine',9.2,0.06);
       lp.frequency.value=9000;amp*=1.3;
@@ -3982,11 +4024,14 @@ const Aud=(function(){
       stop=t+1.6;
     }else{
       let att=0.05, rel=0.08;
-      if(kind==='flute'){osc('sine',1,1);osc('triangle',2,0.12);lp.frequency.value=4000;att=0.06;
-        const nb=ctx.createBufferSource(), buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*0.5),ctx.sampleRate), ch=buf.getChannelData(0);
-        for(let i=0;i<ch.length;i++)ch[i]=Math.random()*2-1;nb.buffer=buf;nb.loop=true;
-        const bp=ctx.createBiquadFilter(), bg=ctx.createGain();bp.type='bandpass';bp.frequency.value=Math.min(12000,f*2);bp.Q.value=2;bg.gain.value=0.05;
-        nb.connect(bp);bp.connect(bg);bg.connect(g);nb.start(t);nb.stop(end+0.5);
+      if(kind==='flute'){osc('sine',1,1);osc('sine',2,0.16);osc('sine',3,0.05);lp.frequency.value=5000;att=0.07;amp*=0.9;
+        /* breath: steady air around the note, plus a chiff of air at the start */
+        const nb=ctx.createBufferSource();nb.buffer=noiseBuf();nb.loop=true;
+        const bp=ctx.createBiquadFilter(), bg=ctx.createGain(), hp=ctx.createBiquadFilter(), hg=ctx.createGain();
+        bp.type='bandpass';bp.frequency.value=Math.min(9000,f*2.2);bp.Q.value=0.8;bg.gain.value=0.22;
+        hp.type='highpass';hp.frequency.value=2500;
+        hg.gain.setValueAtTime(0,t);hg.gain.linearRampToValueAtTime(0.5,t+0.012);hg.gain.setTargetAtTime(0.06,t+0.012,0.05);
+        nb.connect(bp);bp.connect(bg);bg.connect(g);nb.connect(hp);hp.connect(hg);hg.connect(g);nb.start(t);nb.stop(end+0.5);
       }else if(kind==='violin'){osc('sawtooth',1,1);osc('sawtooth',1,0.4,5);lp.frequency.value=2600;lp.Q.value=1.2;att=0.09;rel=0.14;amp*=0.85;}
       else{osc('square',1,1);osc('triangle',1,0.6);lp.frequency.value=1700;att=0.04;amp*=0.75;}
       oscs.forEach(function(o){const l=vib(o,t,kind==='violin'?5.6:5,kind==='violin'?12:kind==='flute'?7:4,0.25);l.stop(end+rel*6);});
