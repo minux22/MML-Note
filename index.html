@@ -201,6 +201,7 @@ h1::before{content:'♪'; display:inline-flex; align-items:center; justify-conte
 .accbox{gap:10px}
 .accrow{display:flex; align-items:center; justify-content:space-between; gap:10px}
 .accrow .tg{margin:0}
+.accbox .acchint{margin:0; text-align:left; font-size:12px}
 .accsub{font-size:inherit; font-weight:600; color:var(--dim); letter-spacing:inherit}
 .mmlbtns{display:flex; gap:8px; margin:8px 0}
 .mmlbtns .btn{flex:1 1 auto; margin:0; white-space:nowrap; padding:0 10px}
@@ -1310,7 +1311,7 @@ input[type=range]::-moz-range-thumb{width:12px; height:22px; border-radius:3px; 
       </div>
       <p class="note">Applies to every track. The melody follows it by the Auto-Velocity amount set in the Melody tab (0% = flat, 100% = full). The drums always follow it. Humanize only shuffles playback; exported MIDI keeps the values above.</p>
     </div>
-    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.8.5 · based on PhraseNote v0.30.8</p>
+    <p class="note" style="text-align:center;font-size:10px;opacity:.6;margin:10px 0 2px">MML Note v0.9.0 · based on PhraseNote v0.30.8</p>
   </div>
 </section>
 
@@ -3003,6 +3004,8 @@ const Core=(function(){
   /* a channel's starting fader: 0 dB, except Strings at -6 dB (75*(1-0.12^(2/3)) = 56.75) */
   const MIXDEF={m:75,a:75,c:75,b:75,d:75,s:56.75,t1:75,t2:75,t3:75,t4:75,t5:75,t6:75};
   const MIXKEYS=['m','a','c','b','d','s','t1','t2','t3','t4','t5','t6'];
+  /* MML volume (v1-15) per part, also the drums: the fader of these channels; harmony sits a little behind the melody */
+  const MVDEF={t1:15,t2:13,t3:11,t4:11,t5:11,t6:11,d:13};
   function faderDb(v){if(v<=0)return -Infinity;if(v>=75)return (v-75)*12/25;return -50*Math.pow(1-v/75,1.5);}
   /* ---- Bake: the accompaniment (keys, bass, strings) as it sounds, spread over ensemble tracks 2-6 ----
      Each track plays one note at a time, so chords are split into voices that move as little as possible.
@@ -3337,7 +3340,7 @@ const Core=(function(){
     });
     /* mixer: fader 0..100 per channel (75 = 0 dB), mute, solo; reverb 0..100; master fader. Strings start at -6 dB. */
     const mx=o.mix&&typeof o.mix==='object'?o.mix:{};
-    p.mix={};MIXKEYS.forEach(function(k){const c=mx[k]&&typeof mx[k]==='object'?mx[k]:{};p.mix[k]={v:c.v==null?MIXDEF[k]:Math.max(0,Math.min(100,Math.round((isFinite(+c.v)?+c.v:75)*100)/100)),mu:!!c.mu,so:!!c.so};});
+    p.mix={};MIXKEYS.forEach(function(k){const c=mx[k]&&typeof mx[k]==='object'?mx[k]:{};p.mix[k]={v:c.v==null?MIXDEF[k]:Math.max(0,Math.min(100,Math.round((isFinite(+c.v)?+c.v:75)*100)/100)),mu:!!c.mu,so:!!c.so};if(MVDEF[k]!=null){const n=Math.round(+c.mv);p.mix[k].mv=n>=1&&n<=15?n:MVDEF[k];}});
     p.mix.rev=mx.rev==null?35:clamp(Math.round(+mx.rev),0,100);p.mix.mst=mx.mst==null?75:clamp(Math.round(+mx.mst),0,100);
     /* how many recordings each place has had (names never reuse a number) */
     p.recN={};if(o.recN&&typeof o.recN==='object')Object.keys(o.recN).slice(0,500).forEach(function(k){const v=Math.round(+o.recN[k]);if(k.length<=60&&v>0&&v<100000)p.recN[k]=v;});
@@ -3602,7 +3605,7 @@ const Core=(function(){
   }
   return {bake:bake,accNotes:accNotes,NTRK:NTRK,INSTS:INSTS,bindMel:bindMel,setCurTrack:setCurTrack,curTrack:curTrack,allMel:allMel,SCALES:SCALES,SCALE_NAMES:SCALE_NAMES,KEY_NAMES:KEY_NAMES,chordInfo:chordInfo,voicing:voicing,
     noteName:noteName,bassNote:bassNote,notesFor:notesFor,
-    DTYPES:DTYPES,DKITS:DKITS,TKITS:TKITS,dtypeOf:dtypeOf,kitOf:kitOf,COMPS:COMPS,MIXDEF:MIXDEF,GSHARED:GSHARED,instP:instP,compsFor:compsFor,recipeOf:recipeOf,recipeDiff:recipeDiff,BASS_BY_KIND:BASS_BY_KIND,STRS:STRS,strPatch:strPatch,strVoicing:strVoicing,BASSES:BASSES,bassKind:bassKind,bassPatch:bassPatch,GUITAR:GUITAR,instOf:instOf,compPatch:compPatch,gtrVoicing:gtrVoicing,compOk:compOk,applyStyle:applyStyle,NEUTRAL:NEUTRAL,eventsAt:eventsAt,swingOff:swingOff,fitMel:fitMel,tidy:tidy,keySig:keySig,insertMono:insertMono,meter:meter,unitsFor:unitsFor,remapChords:remapChords,melBars:melBars,TS_LIST:TS_LIST,quantize:quantize,shiftMelKey:shiftMelKey,mapMelScale:mapMelScale,remapMelMeter:remapMelMeter,melVel:melVel,posVel:posVel,drumsAt:drumsAt,dpFromPreset:dpFromPreset,DLANES:DLANES,DNOTE:DNOTE,DPATS:DPATS,melAt:melAt,randomChords:randomChords,buildMidi:buildMidi,faderDb:faderDb,zipMany:zipMany,unzip:unzip,zip:zip,crc32:crc32,defaults:defaults,fresh:fresh,normalize:normalize,fileStem:fileStem,mkMap:mkMap,tempoMap:tempoMap,secAt:secAt,tickAt:tickAt,bpmAt:bpmAt,mapPairs:mapPairs,takeMap:takeMap,takeLen:takeLen,nextSection:nextSection,NEXT_ROLE:NEXT_ROLE,slotStats:slotStats,
+    DTYPES:DTYPES,DKITS:DKITS,TKITS:TKITS,dtypeOf:dtypeOf,kitOf:kitOf,COMPS:COMPS,MIXDEF:MIXDEF,MVDEF:MVDEF,GSHARED:GSHARED,instP:instP,compsFor:compsFor,recipeOf:recipeOf,recipeDiff:recipeDiff,BASS_BY_KIND:BASS_BY_KIND,STRS:STRS,strPatch:strPatch,strVoicing:strVoicing,BASSES:BASSES,bassKind:bassKind,bassPatch:bassPatch,GUITAR:GUITAR,instOf:instOf,compPatch:compPatch,gtrVoicing:gtrVoicing,compOk:compOk,applyStyle:applyStyle,NEUTRAL:NEUTRAL,eventsAt:eventsAt,swingOff:swingOff,fitMel:fitMel,tidy:tidy,keySig:keySig,insertMono:insertMono,meter:meter,unitsFor:unitsFor,remapChords:remapChords,melBars:melBars,TS_LIST:TS_LIST,quantize:quantize,shiftMelKey:shiftMelKey,mapMelScale:mapMelScale,remapMelMeter:remapMelMeter,melVel:melVel,posVel:posVel,drumsAt:drumsAt,dpFromPreset:dpFromPreset,DLANES:DLANES,DNOTE:DNOTE,DPATS:DPATS,melAt:melAt,randomChords:randomChords,buildMidi:buildMidi,faderDb:faderDb,zipMany:zipMany,unzip:unzip,zip:zip,crc32:crc32,defaults:defaults,fresh:fresh,normalize:normalize,fileStem:fileStem,mkMap:mkMap,tempoMap:tempoMap,secAt:secAt,tickAt:tickAt,bpmAt:bpmAt,mapPairs:mapPairs,takeMap:takeMap,takeLen:takeLen,nextSection:nextSection,NEXT_ROLE:NEXT_ROLE,slotStats:slotStats,
     POOL_MAJOR:POOL_MAJOR,POOL_MINOR:POOL_MINOR,POOL_HARM:POOL_HARM,suggestChords:suggestChords,guessKey:guessKey,rekey:rekey,recode:recode,SEC_IDS:SEC_IDS,ROLES:ROLES,SECF:SECF,normSec:normSec,copySec:copySec,secOf:secOf,curId:curId,storeCur:storeCur,loadCur:loadCur,layout:layout,formTicks:formTicks,secView:secView,secDrums:secDrums,songAt:songAt,melInsert:melInsert,melDelete:melDelete,melSlice:melSlice,melPaste:melPaste,resizeSec:resizeSec,xcode:xcode,isX:isX,xWith:xWith,extraPalette:extraPalette};
 })();
 
@@ -4259,7 +4262,7 @@ function schedule(step,t){
     Aud.note(e.k,e.midi,v,t+(e.off||0)*spb+lj(),e.dur*spb,e.vel);
   });
   ms.forEach(function(e){
-    const v=P.mml.accent?Math.round(accLevel(e.s)/15*112):Math.max(1,Math.min(127,e.vel+jit()));
+    const ti=+e.k.slice(1)-1, mv=(P.mix[e.k]&&P.mix[e.k].mv)||15, v=Math.max(1,Math.round(112*mmlVol(ti,e.s)/mv));
     Aud.note(e.k,e.midi,v,t+e.off*spb,e.dur*spb,e.vel);
   });
   dr.forEach(function(d){Aud.drum(d.n,Math.max(1,Math.min(127,d.vel+jit())),t+d.off*spb+lj(),d.vel,d.nf);});
@@ -7730,6 +7733,11 @@ $('#trkRow').addEventListener('click',function(e){const b=e.target.closest('.trk
 
 /* accent (MML v): strong on the bar's first beat, medium in the middle of the bar (beat 3 in 4/4, beat 4 in 6/8),
    weak everywhere else. Bars with an odd number of beats have no medium. */
+function mmlVol(i,s){
+  const mx=P.mix['t'+(i+1)], mv=mx&&mx.mv?mx.mv:15;
+  if(!P.mml.accent)return mv;
+  const a=P.mml.acc;return Math.max(1,Math.round(mv*accLevel(s)/a[0]));
+}
 function accLevel(s){
   const M=Core.meter(P), pos=((s%M.bar)+M.bar)%M.bar, beats=Math.round(M.bar/M.bt), a=P.mml.acc;
   if(pos===0)return a[0];
@@ -7741,7 +7749,7 @@ function mmlSong(){
   const M=Core.meter(P), sh=P.pick&&P.tracks.some(function(t){return t.some(function(n){return n.s<0;});})?M.bar:0;
   let end=Core.formTicks(P);P.tracks.forEach(function(t){t.forEach(function(n){end=Math.max(end,n.s+n.l);});});
   end=Math.ceil((end+sh)/M.bar)*M.bar;
-  const tracks=P.tracks.map(function(t){return {notes:t.filter(function(n){return n.s+sh>=0&&n.s+sh<end;}).map(function(n){return {tick:Math.round((n.s+sh)/5),dur:Math.max(1,Math.round(Math.min(n.l,end-n.s-sh)/5)),midi:n.p,vol:P.mml.accent?accLevel(n.s):null};})};});
+  const tracks=P.tracks.map(function(t,i){return {notes:t.filter(function(n){return n.s+sh>=0&&n.s+sh<end;}).map(function(n){return {tick:Math.round((n.s+sh)/5),dur:Math.max(1,Math.round(Math.min(n.l,end-n.s-sh)/5)),midi:n.p,vol:mmlVol(i,n.s)};})};});
   return {song:{tempo:Math.max(32,Math.min(255,P.bpm)),beatsPerBar:M.bar/480,tracks:tracks},endTick:end/5,bpb:M.bar/480,pick:sh>0};
 }
 var MM=null, mmT=0;
@@ -7780,6 +7788,7 @@ function renderMml(){
   h+='<div class="sbox throw"><span class="lbl">Limit</span><div class="seg" id="mmlLim" role="group" aria-label="Characters per track"></div></div>';
   h+='<div class="sbox throw"><span class="lbl">Use n</span><button type="button" class="tg" id="mmlN" role="switch" aria-checked="'+(P.mml.useN?'true':'false')+'" aria-label="Use n notes"></button></div>';
   h+='<div class="sbox accbox"><div class="accrow"><span class="lbl">Accent <small class="accsub">(Volume control)</small></span><button type="button" class="tg" id="mmlAcc" role="switch" aria-checked="'+(P.mml.accent?'true':'false')+'" aria-label="Accent with volume"></button></div>';
+  h+='<p class="hint acchint">'+(P.mml.accent?'Each part\'s level (v) comes from the mixer. Medium and Weak take the same share of it as here ('+P.mml.acc[1]+'/'+P.mml.acc[0]+', '+P.mml.acc[2]+'/'+P.mml.acc[0]+').':'Each part plays at its mixer level (v).')+'</p>';
   if(P.mml.accent)h+='<div class="accrow accv"><span></span><span class="accs">'+['Strong','Medium','Weak'].map(function(nm,i){let o='';for(let v=15;v>=1;v--)o+='<option'+(v===P.mml.acc[i]?' selected':'')+'>'+v+'</option>';return '<label>'+nm+'<select data-acc="'+i+'">'+o+'</select></label>';}).join('')+'</span></div>';
   h+='</div>';
   h+='<div class="mmlbtns"><button class="btn primary" type="button" id="mmlAll">Copy MML@ (all parts)</button><button class="btn" type="button" id="mmlSave">Save MML file (.txt)</button></div>';
@@ -7843,7 +7852,7 @@ function mixDbText(v){const d=Core.faderDb(v);return d===-Infinity?'−∞':(d>0
 /* fader, mute and solo into the channel buses; reverb and master as before */
 function applyMix(){
   const mx=P.mix, anySolo=MXCH.some(function(c){return mx[c[0]].so;}), g={};
-  MXCH.forEach(function(c){const k=c[0], ch=mx[k], db=Core.faderDb(ch.v);g[k]=(ch.mu||(anySolo&&!ch.so)||db===-Infinity)?0:Math.pow(10,db/20);});
+  MXCH.forEach(function(c){const k=c[0], ch=mx[k];g[k]=(ch.mu||(anySolo&&!ch.so))?0:(ch.mv||15)/15;});
   Aud.setMix(g);Aud.setReverb(mx.rev/100*0.6);
   const dm=Core.faderDb(mx.mst);Aud.setMaster(dm===-Infinity?0:Math.pow(10,dm/20));
 }
@@ -7851,14 +7860,15 @@ function mixRender(){
   const host=$('#mxIn');if(!host)return;host.innerHTML='';
   const mx=P.mix, anySolo=MXCH.some(function(c){return mx[c[0]].so;});
   const strip=function(k,name,grp,v,val,ms,off,sep){
+    const mvk=Core.MVDEF[k]!=null;
     const d=document.createElement('div');d.className='mx'+(off?' off':'')+(sep?' sep':'');d.dataset.k=k;
     d.innerHTML='<span class="mn">'+(grp?'<small>'+grp+'</small>':'<small>&nbsp;</small>')+name+'</span><span class="mv">'+val+'</span>'+
-      '<div class="fw"><input type="range" min="0" max="100" step="1" aria-label="'+(grp?grp+' ':'')+name+' level"></div>'+
+      '<div class="fw"><input type="range" min="'+(mvk?1:0)+'" max="'+(mvk?15:100)+'" step="1" aria-label="'+(grp?grp+' ':'')+name+(mvk?' MML volume':' level')+'"></div>'+
       '<div class="ms">'+(ms?'<button type="button" class="m" aria-pressed="'+(mx[k].mu?'true':'false')+'" aria-label="Mute '+name+'">M</button><button type="button" class="s" aria-pressed="'+(mx[k].so?'true':'false')+'" aria-label="Solo '+name+'">S</button>':'')+'</div>';
     host.appendChild(d);const inp=d.querySelector('input');inp.value=v;if(window.__rangeRO)window.__rangeRO.observe(inp);
   };
   /* the Chords strip is named after the instrument of the current slot (Keys or Guitar) */
-  MXCH.forEach(function(c){const ch=mx[c[0]], nm=c[1];strip(c[0],nm,c[2]||'',ch.v,mixDbText(ch.v),true,ch.mu||(anySolo&&!ch.so),false);});
+  MXCH.forEach(function(c){const ch=mx[c[0]], nm=c[1];strip(c[0],nm,c[2]||'',ch.mv,'v'+ch.mv,true,ch.mu||(anySolo&&!ch.so),false);});
   strip('rev','Reverb','',mx.rev,mx.rev+'%',false,false,true);
   strip('mst','Master','',mx.mst,mixDbText(mx.mst),false,false,false);
   const ms=host.querySelector('.mx[data-k=mst]');ms.classList.add('mst');
@@ -7893,12 +7903,12 @@ let mixSaveT=null;
 function mixSave(){clearTimeout(mixSaveT);mixSaveT=setTimeout(persist,400);}
 $('#mxIn').addEventListener('input',function(e){
   const st=e.target.closest('.mx');if(!st)return;const k=st.dataset.k, v=+e.target.value;
-  if(k==='rev')P.mix.rev=v;else if(k==='mst')P.mix.mst=v;else P.mix[k].v=v;
-  st.querySelector('.mv').textContent=k==='rev'?v+'%':mixDbText(v);
+  if(k==='rev')P.mix.rev=v;else if(k==='mst')P.mix.mst=v;else if(Core.MVDEF[k]!=null)P.mix[k].mv=v;else P.mix[k].v=v;
+  st.querySelector('.mv').textContent=k==='rev'?v+'%':Core.MVDEF[k]!=null?'v'+v:mixDbText(v);
   applyMix();mixSave();
 });
 /* double-tap a fader: back to its start (0 dB, Strings -6 dB; reverb 35%). Taps are timed here: phones do not send dblclick to sliders */
-function mixReset(k){const v=k==='rev'?35:k==='mst'?75:(Core.MIXDEF[k]!=null?Core.MIXDEF[k]:75);if(k==='rev')P.mix.rev=v;else if(k==='mst')P.mix.mst=v;else P.mix[k].v=v;applyMix();mixRender();mixSave();if(navigator.vibrate)try{navigator.vibrate(18);}catch(x){}}
+function mixReset(k){if(Core.MVDEF[k]!=null){P.mix[k].mv=Core.MVDEF[k];applyMix();mixRender();mixSave();return;}const v=k==='rev'?35:k==='mst'?75:(Core.MIXDEF[k]!=null?Core.MIXDEF[k]:75);if(k==='rev')P.mix.rev=v;else if(k==='mst')P.mix.mst=v;else P.mix[k].v=v;applyMix();mixRender();mixSave();if(navigator.vibrate)try{navigator.vibrate(18);}catch(x){}}
 let mxTap={k:null,t:0,y:0};
 $('#mxIn').addEventListener('pointerdown',function(e){
   const st=e.target.closest('.mx');if(!st||!e.target.closest('.fw'))return;const k=st.dataset.k, now=Date.now();
